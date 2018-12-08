@@ -442,6 +442,19 @@
             <ComboBox fx:id="startTimeMinComboBox" layoutX="115.0" layoutY="688.0" prefHeight="27.0" prefWidth="70.0" AnchorPane.rightAnchor="14.0" />
             <ComboBox fx:id="endTimeHourComboBox" layoutX="10.0" layoutY="763.0" prefHeight="27.0" prefWidth="85.0" AnchorPane.leftAnchor="10.0" />
             <ComboBox fx:id="endTimeMinComboBox" layoutX="115.0" layoutY="763.0" prefHeight="27.0" prefWidth="70.0" AnchorPane.rightAnchor="14.0" />
+            <AnchorPane prefHeight="449.0" prefWidth="200.0" AnchorPane.bottomAnchor="415.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <TableView fx:id="oneDayTableView" layoutY="158.0" prefHeight="291.0" prefWidth="199.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="158.0">
+                    <columns>
+                        <TableColumn fx:id="oneDayTableColumn" minWidth="19.0" prefWidth="200.0" />
+                    </columns>
+                  </TableView>
+                  <DatePicker fx:id="oneDateApptDatePicker" layoutX="6.0" layoutY="74.0" prefHeight="39.0" prefWidth="179.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" />
+                  <Label layoutX="18.0" layoutY="24.0" text="CHOOSE A DATE TO VIEW" />
+                  <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" AnchorPane.rightAnchor="6.5" />
+                  <Button fx:id="exportAllButton" layoutX="6.0" layoutY="113.0" mnemonicParsing="false" onAction="#exportAllButtonPushed" text="Export All" />
+               </children>
+            </AnchorPane>
          </children>
       </AnchorPane>
       <Label fx:id="currentUsernameInfo" text="currentUsernameInfo" AnchorPane.leftAnchor="650.0" AnchorPane.topAnchor="7.0" />

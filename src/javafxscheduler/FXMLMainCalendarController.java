@@ -48,12 +48,15 @@ public class FXMLMainCalendarController implements Initializable {
     */
     @FXML private Label currentUsernameInfo; 
     @FXML private DatePicker apptDatePicker;
+    @FXML private DatePicker oneDateApptDatePicker;
     @FXML private TextField apptNameTextField;
     @FXML private ComboBox startTimeHourComboBox; 
     @FXML private ComboBox startTimeMinComboBox; 
     @FXML private ComboBox endTimeHourComboBox; 
     @FXML private ComboBox endTimeMinComboBox;
     @FXML private Button saveApptButton;
+    @FXML private Button selectOneDateButton; 
+    @FXML private Button exportAllButton; 
     
             
         //Items in the Menu
@@ -72,11 +75,15 @@ public class FXMLMainCalendarController implements Initializable {
         @FXML private MenuItem setCalendarColorMenuItem;
     @FXML private Menu helpMenu; 
    
-        //Items relating to Calendar
+    /* Items relating to Calendar */
     @FXML private Label currentMonthLabel;
     @FXML private Button previousMonthButton;
     @FXML private Button nextMonthButton;
     @FXML private Button todayButton;
+    @FXML private TableView<Event> oneDayTableView; 
+    @FXML private TableColumn oneDayTableColumn; 
+    
+    /* Calendar part */
     @FXML private TableView<Event> t1; @FXML private TableView<Event> t2; @FXML private TableView<Event> t3; @FXML private TableView<Event> t4; @FXML private TableView<Event> t5;
     @FXML private TableView<Event> t6; @FXML private TableView<Event> t7; @FXML private TableView<Event> t8; @FXML private TableView<Event> t9; @FXML private TableView<Event> t10;
     @FXML private TableView<Event> t11; @FXML private TableView<Event> t12; @FXML private TableView<Event> t13; @FXML private TableView<Event> t14; @FXML private TableView<Event> t15;    
@@ -93,12 +100,13 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private TableColumn d31; @FXML private TableColumn d32; @FXML private TableColumn d33; @FXML private TableColumn d34; @FXML private TableColumn d35;
     private List<TableColumn> dayArray;
     private List<TableView> eventInDayArray = new ArrayList<>();
-    /*
-     * Other fields
-     */
+    
+    
+    /* Other fields */
     private User signedInUser = new User(); 
     private YearMonth currentYearMonth;
     private YearMonth todayYearMonth;
+    private EventsOfADay eventDay; 
 
     /* Constructor */
     public FXMLMainCalendarController() {
@@ -585,26 +593,122 @@ public class FXMLMainCalendarController implements Initializable {
      */
     public void tableViewClicked(MouseEvent event) {
         if (event.getPickResult().getIntersectedNode().getParent().getId() != null) {
+            int year = currentYearMonth.getYear();
+            int month = currentYearMonth.getMonthValue();
+            int tableSelectedIndex = Integer.valueOf(event.getPickResult().getIntersectedNode().getParent().getId()); 
+            int day = Integer.valueOf(dayArray.get(tableSelectedIndex).getText());
 
-        int year = currentYearMonth.getYear();
-        int month = currentYearMonth.getMonthValue();
-        int index = Integer.valueOf(event.getPickResult().getIntersectedNode().getParent().getId());
-        int day = Integer.valueOf(dayArray.get(index).getText());
-        
-        if (index <= 6 && Integer.valueOf(dayArray.get(index).getText()) > 23) {
-            //currentYearMonth = currentYearMonth.minusMonths(1);
-        }
-        else {
-        apptDatePicker.setValue(LocalDate.of(year, month, day));
-        }
+            if (tableSelectedIndex <= 6 && Integer.valueOf(dayArray.get(tableSelectedIndex).getText()) > 23) {
+                //currentYearMonth = currentYearMonth.minusMonths(1);
+            }
+            else {
+            apptDatePicker.setValue(LocalDate.of(year, month, day));
+            }
         }  
     }    
+    
+    public void selectOneDateButtonClicked () {
+        LocalDate input = oneDateApptDatePicker.getValue(); 
+        /* Search database all the events on that date */ 
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM EVENTS WHERE DATE = ? AND FK_USERNAME = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, input.toString());
+            pstmt.setString(2, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            /* Create an ArrayList to store all the events.
+             * Each event is considered to be an String array.
+             * The format of the String[] is : [date, event_name, start_time, end_time, fk_username]
+            */ 
+            ArrayList <Object[]> eventsArrayList = new ArrayList(); 
+            while (rs.next()) {
+                /* Get data from database of the user on a specific date */
+                    //Dealing with date. 
+                Date tempDate = rs.getDate("date");
+                LocalDate date = tempDate.toLocalDate();
+
+                String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
+                System.out.println("dateString: " + dateString);
+                    //Other data
+                String tempEventName = rs.getNString("event_name"); 
+                int tempStartTime = rs.getInt("start_time");
+                int tempEndTime = rs.getInt("end_time");
+                String tempUserName = rs.getNString("fk_username");
+                /* Create an object array to hold all the information */
+                Object[] oArr = new Object[] {dateString, tempEventName, 
+                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName  }; 
+                /* Add that object array into the ArrayList */
+                eventsArrayList.add(oArr);
+            }
+            
+            /* Create an object EventOfADay in this MainCalendar */
+            eventDay = new EventsOfADay(signedInUser.getUsername(), eventsArrayList); 
+            eventDay.getEventCollection();
+            eventDay.writeToFile();
+            
+            } catch (SQLException ex) {
+            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+    }
+    
+    public void exportAllButtonPushed () {
+        LocalDate input = oneDateApptDatePicker.getValue(); 
+        /* Search database all the events on that date */ 
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM EVENTS WHERE DATE BETWEEN ? AND ? AND FK_USERNAME = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, "1900-01-01");
+            pstmt.setString(2, "2099-01-01");
+            pstmt.setString(3, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            /* Create an ArrayList to store all the events.
+             * Each event is considered to be an String array.
+             * The format of the String[] is : [date, event_name, start_time, end_time, fk_username]
+            */ 
+            ArrayList <Object[]> eventsArrayList = new ArrayList(); 
+            while (rs.next()) {
+                /* Get data from database of the user on a specific date */
+                    //Dealing with date. 
+                Date tempDate = rs.getDate("date");
+                LocalDate date = tempDate.toLocalDate();
+
+                String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
+                System.out.println("dateString: " + dateString);
+                    //Other data
+                String tempEventName = rs.getNString("event_name"); 
+                int tempStartTime = rs.getInt("start_time");
+                int tempEndTime = rs.getInt("end_time");
+                String tempUserName = rs.getNString("fk_username");
+                /* Create an object array to hold all the information */
+                Object[] oArr = new Object[] {dateString, tempEventName, 
+                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName  }; 
+                /* Add that object array into the ArrayList */
+                eventsArrayList.add(oArr);
+            }
+            
+            /* Create an object EventOfADay in this MainCalendar */
+            eventDay = new EventsOfADay(signedInUser.getUsername(), eventsArrayList); 
+            eventDay.getEventCollection();
+            eventDay.writeToFile();
+            
+            } catch (SQLException ex) {
+            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+    }
+    
     
     /************************************** INITIALIZATION **************************************/
     //create method for retreiving event data and refreshing it everything calendar changes.
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
         
                 //Populate the calendar with day numbers
         //Put the tablecolumns into the day array
