@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLLoginController">
+   <children>
+      <VBox prefHeight="200.0" prefWidth="100.0" spacing="70.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="450.0" AnchorPane.rightAnchor="35.0" AnchorPane.topAnchor="150.0">
+         <children>
+            <TextField fx:id="usernameTextField" alignment="CENTER" onAction="#loginButtonPushed" promptText="Username" />
+            <TextField fx:id="passwordTextField" alignment="CENTER" onAction="#loginButtonPushed" promptText="Password" />
+            <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginButtonPushed" prefHeight="27.0" prefWidth="218.0" text="Log In" />
+         </children>
+         <padding>
+            <Insets bottom="50.0" left="50.0" right="50.0" top="100.0" />
+         </padding>
+      </VBox>
+      <Label fx:id="signInLabel" alignment="CENTER" layoutX="550.0" layoutY="106.0" text="Sign In">
+         <font>
+            <Font size="36.0" />
+         </font>
+      </Label>
+      <StackPane prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="150.0">
+         <children>
+            <Button fx:id="registerButton" mnemonicParsing="false" onAction="#registerButtonPushed" prefHeight="27.0" prefWidth="218.0" text="Register" />
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>
