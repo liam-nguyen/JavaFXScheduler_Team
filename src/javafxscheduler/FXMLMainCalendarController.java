@@ -2,6 +2,7 @@ package javafxscheduler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -116,7 +119,9 @@ public class FXMLMainCalendarController implements Initializable {
         todayYearMonth = YearMonth.from(LocalDate.now());
         
         //Initialize Scene elements.
-        String[] hourList = new String[] {"1","2","3","4","5","6","7","8","9","10","11","12"};
+        String[] hourList = new String[] {"12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM",
+                "9AM","10AM","11AM","12PM","1PM","2PM","3PM","4PM","5PM",
+                "6PM","7PM","8PM","9PM","10PM","11PM","12PM"};
         String[] intList = new String[60]; 
         DecimalFormat formatter = new DecimalFormat("00"); //set minutes to two digit
         
@@ -163,22 +168,69 @@ public class FXMLMainCalendarController implements Initializable {
     }
     
     /************************************** LOGIC **************************************/
-    /**
-     * This method verifies hour and minute input.
-     * @param number: the value of hour or minute.
-     * @param type: "h" for hour and "m" for minute.
+    /** This method checks if the input start time and end time are valid.
+     * @param startTime: event's start time.
+     * @param endTime: event's end time
+     * @return 
+     */
+    public boolean validTime (int startTime, int endTime) {
+        boolean valid = true; 
+        //Check if the HOUR of end time is after start time
+        if (startTime >= endTime) {
+            valid = false; 
+        }
+        return valid;
+    }
+    
+        /**
+     * This method checks if new appointment conflicts with current appointment. 
      * @return boolean: true if valid. 
      */
-    public boolean timeVerification (int number, String type) {
-        boolean valid = false; 
-        if (type.equals("h") && 0 <= number && number <= 24)  {
-            return valid = true; 
+    public boolean apptConflict (LocalDate apptDate, int startTime, int endTime) {
+        System.out.println("Checking date: " + apptDate);
+        boolean conflicted = false;
+        try {
+            final int HOUR = 24, MIN = 60; 
+            boolean dayBlock[] = new boolean [HOUR*MIN];
+            
+            //Initialize the dayBlock
+            for (int i = 0; i < HOUR * MIN; i++) {
+                dayBlock[i] = true;
+            }
+            
+            //Check if there is any appointment happens on the same date.
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM EVENTS WHERE fk_username=? AND date = ?";
+            PreparedStatement pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, signedInUser.getUsername());
+            pstmt.setString(2, String.valueOf(apptDate));
+            ResultSet rs = pstmt.executeQuery();
+            
+            //If there is a result, there is a potential conflict. 
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    //Get value from database
+                    Date sqlDate = rs.getDate("date"); 
+                    LocalDate sqlLocalDate = sqlDate.toLocalDate();
+                    int sqlStartHour = rs.getInt("start_time");
+                    int sqlStartMin = rs.getInt("end_time");
+                    //Mark all the busy minutes. 
+                    for (int i = sqlStartHour; i < sqlStartMin; i++) {
+                        dayBlock[i] = false;
+                    }
+                    for (int i = startTime; i < endTime; i++) {
+                        if (dayBlock[i] == false) {
+                            conflicted = true;
+                            break; 
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("apptConflict Error: " + ex);
         }
-        else if (type.equals("m") && 0 <= number && number <= 60) {
-            return valid = true; 
-        }
-        else 
-            return false; 
+        return conflicted; 
     }
     
     //Set the calendar to DatePicker's date
@@ -271,43 +323,97 @@ public class FXMLMainCalendarController implements Initializable {
     /**
      * This method is called when saveButton is clicked.
      */
-    public void saveButtonPushed() {
-        LocalDate apptLocalDate = apptDatePicker.getValue();
-        String apptName = apptNameTextField.getText();
-        startTimeHourComboBox.getSelectionModel().getSelectedIndex();
-
-        //Save event infomation into Events table
+    public void saveAppointmentButtonPushed() {
         try {
-        DatabaseHandler db = new DatabaseHandler();
-                db.connect_CALENDAR();
-                PreparedStatement pstmt;
-                String query; 
-                
-                query = "INSERT INTO EVENTS (date, event_name, start_time, end_time, fk_username) "
-                            + "VALUES (?, ?, ?, ?, ?)";
-                    pstmt = db.conn.prepareStatement(query);
-                    pstmt.setDate(1, java.sql.Date.valueOf(apptLocalDate));
-                    pstmt.setString(2, apptNameTextField.getText());
-                    pstmt.setString(3, startTimeHourComboBox.getValue() + ":" + startTimeMinComboBox.getValue() + ":" + "00");
-                    pstmt.setString(4, endTimeHourComboBox.getValue() + ":" + endTimeMinComboBox.getValue() + ":" + "00");
-                    pstmt.setString(5, signedInUser.getUsername());
-                    pstmt.executeUpdate();
-                    
-                    //Notify user about successful registration
-                    Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
-                    confirmationAlert.setContentText("Successful Registration");
-                    confirmationAlert.getButtonTypes().remove(1);
-                    confirmationAlert.showAndWait();
-                    
-                    //Set the event into the calendar
-                    setCalToDatePicker();
-                    
-                    } catch (SQLException e) {
-                        System.err.println(e.getMessage() + "--- setup calendar table");
+            /*
+            * Check if any required fields are empty.
+            */
+                //If datepicker is not chosen.
+            if (apptDatePicker.getValue() == null) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setContentText("Date required");
+                alert.showAndWait();
             }
+            //If event name is empty.
+            else if (apptNameTextField.getText().trim().isEmpty()) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setContentText("Event Name required");
+                alert.showAndWait();
+            }
+            //If event name is empty.
+            else if (startTimeHourComboBox.getSelectionModel().isEmpty()) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setContentText("Start Time Required");
+                alert.showAndWait();
+            }
+            //If event name is empty.
+            else if (endTimeHourComboBox.getSelectionModel().isEmpty()) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setContentText("End Time Required");
+                alert.showAndWait();
+            }
+            else {
+                /* Get all values from DatePicker */
+                LocalDate apptLocalDate = apptDatePicker.getValue();
+                String apptName = apptNameTextField.getText();
+                int startTime = startTimeHourComboBox.getSelectionModel().getSelectedIndex() * 60 + startTimeMinComboBox.getSelectionModel().getSelectedIndex();
+                System.out.println("starttime: " + startTime);
+                int endTime = endTimeHourComboBox.getSelectionModel().getSelectedIndex() * 60 + endTimeMinComboBox.getSelectionModel().getSelectedIndex();
+                System.out.println("endtime: " + endTime);
+                /* Check if the input start and end time are valid */
+                    boolean validTime = validTime(startTime, endTime);
 
+                    if (validTime == false) {
+                        Alert alert = new Alert(AlertType.WARNING);
+                        alert.setContentText("End Time can't be before Start Time");
+                        alert.showAndWait();
+                    }
+
+                    else {
+                        //Checking for appointment conflicts.
+                        boolean conflicted = apptConflict(apptLocalDate,startTime, endTime); 
+                        System.out.println("Event: " + apptNameTextField.getText() + 
+                            ". Conflicted: " + conflicted); 
+                        if (conflicted == false) {
+                            //Save data into database sql
+                            //Save event infomation into Events table
+                            DatabaseHandler db = new DatabaseHandler();
+                            db.connect_CALENDAR();
+                            PreparedStatement pstmt;
+                            String query; 
+
+                            query = "INSERT INTO EVENTS (date, event_name, start_time, end_time, fk_username) "
+                                        + "VALUES (?, ?, ?, ?, ?)";
+                            pstmt = db.conn.prepareStatement(query);
+                            pstmt.setDate(1, java.sql.Date.valueOf(apptLocalDate));
+                            pstmt.setString(2, apptName);
+                            pstmt.setString(3, String.valueOf(startTime));
+                            pstmt.setString(4, String.valueOf(endTime));
+                            pstmt.setString(5, signedInUser.getUsername());
+                            pstmt.executeUpdate();
+                            //Close connection
+                            db.close_JDBC();
+
+                            //Notify user about successful registration
+                            Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
+                            confirmationAlert.setContentText("Successful Registration");
+                            confirmationAlert.getButtonTypes().remove(1);
+                            confirmationAlert.showAndWait();
+
+                            //Set the event into the calendar
+                            setCalToDatePicker();    
+                        }
+                        else {
+                            Alert alert = new Alert(AlertType.WARNING);
+                            alert.setContentText("Conflicted time with Existing Events");
+                            alert.showAndWait();
+                        }
+                    }
+            }
+        }  catch (SQLException ex) {
+            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-    
     /**
      * This method gets the account detail scene is chosen.
      */
