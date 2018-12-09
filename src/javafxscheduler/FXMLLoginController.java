@@ -43,7 +43,7 @@ public class FXMLLoginController implements Initializable {
     public void registerButtonPushed (ActionEvent event) { 
         try {
             /*
-            * Switch to Main Calendar Scene
+            * Switch to Registration
             */
             Parent mainCalendarParent = FXMLLoader.load(getClass().getResource("FXMLRegistration.fxml"));
             Scene mainCalendarScene = new Scene(mainCalendarParent);

@@ -6,14 +6,46 @@
 package javafxscheduler;
 
 import java.sql.Date;
+import java.text.DecimalFormat;
 
 /**
  *
  * @author ilike
  */
 public class Event {
-    private String eventName, startTime, endTime, fkUserName;
-    private Date eventDate;
+     String eventName, startTime, endTime, fkUserName, eventDate;
+     String realStartTime , realEndTime; 
+
+    public String getRealStartTime() {
+        return realStartTime;
+    }
+
+    public void setRealStartTime(String realStartTime) {
+        this.realStartTime = realStartTime;
+    }
+
+    public String getRealEndTime() {
+        return realEndTime;
+    }
+
+    public void setRealEndTime(String realEndTime) {
+        this.realEndTime = realEndTime;
+    }
+    
+    public Event(String date, String name, String start, String end, String username) {
+        eventDate = date; 
+        eventName = name;
+        startTime = start; 
+        endTime = end; 
+        fkUserName = username;
+        /* Convert back to real hour and minutes for start and end time */
+        int startValue = Integer.parseInt(start); 
+        int endValue = Integer.parseInt(end);
+        DecimalFormat formatter = new DecimalFormat("00"); 
+
+        realStartTime = Integer.toString(startValue / 60) + ":" + formatter.format(startValue % 60); 
+        realEndTime = Integer.toString(endValue / 60) + ":" + formatter.format(endValue % 60); 
+    }
     
     public Event(String eventName) {
         this.eventName = eventName;
@@ -51,12 +83,12 @@ public class Event {
         this.fkUserName = fkUserName;
     }
 
-    public Date getEventDate() {
+    public String getEventDate() {
         return eventDate;
     }
 
     public void setEventDate(Date eventDate) {
-        this.eventDate = eventDate;
+        this.eventDate = eventDate.toString();
     }
     
 }

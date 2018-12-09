@@ -28,10 +28,10 @@
                   <MenuItem fx:id="logoutMenuItem" mnemonicParsing="false" onAction="#logOutMenuItemPushed" text="Log Out" />
             </items>
           </Menu>
-          <Menu fx:id="appointmentMenu" mnemonicParsing="false" text="Appointment">
+          <Menu fx:id="appointmentMenu" mnemonicParsing="false" text="Appointments">
             <items>
-              <MenuItem fx:id="makeAppointmentMenuItem" mnemonicParsing="false" text="Make Appointment" />
-                  <MenuItem fx:id="cancelAppointmentMenuItem" mnemonicParsing="false" text="Cancel Appointment" />
+              <MenuItem fx:id="exportAllAppointmentMenuItem" mnemonicParsing="false" onAction="#exportAllMenuItemPushed" text="Export All Appointment" />
+                  <MenuItem fx:id="importAppointmentMenuItem" mnemonicParsing="false" onAction="#importAppointmentMenuItemPushed" text="Import All Appointment" />
                   <MenuItem fx:id="changeAppointmentMenuItem" mnemonicParsing="false" text="Change Appointment" />
             </items>
           </Menu>
@@ -452,7 +452,6 @@
                   <DatePicker fx:id="oneDateApptDatePicker" layoutX="6.0" layoutY="74.0" prefHeight="39.0" prefWidth="179.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" />
                   <Label layoutX="18.0" layoutY="24.0" text="CHOOSE A DATE TO VIEW" />
                   <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" AnchorPane.rightAnchor="6.5" />
-                  <Button fx:id="exportAllButton" layoutX="6.0" layoutY="113.0" mnemonicParsing="false" onAction="#exportAllButtonPushed" text="Export All" />
                </children>
             </AnchorPane>
          </children>

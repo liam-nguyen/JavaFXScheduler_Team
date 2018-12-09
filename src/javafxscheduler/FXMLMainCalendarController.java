@@ -1,5 +1,6 @@
 package javafxscheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
@@ -38,6 +39,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 //import jfxtras.scene.control.CalendarPicker;
 
@@ -56,7 +58,6 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private ComboBox endTimeMinComboBox;
     @FXML private Button saveApptButton;
     @FXML private Button selectOneDateButton; 
-    @FXML private Button exportAllButton; 
     
             
         //Items in the Menu
@@ -67,8 +68,8 @@ public class FXMLMainCalendarController implements Initializable {
         @FXML private MenuItem accountDetailMenuItem; 
         @FXML private MenuItem logoutMenuItem;
     @FXML private Menu appointmentMenu;
-        @FXML private MenuItem makeAppointmentMenuItem;
-        @FXML private MenuItem cancelAppointmentMenuItem;
+        @FXML private MenuItem exportAllAppointmentMenuItem;
+        @FXML private MenuItem importAppointmentMenuItem;
         @FXML private MenuItem changeAppointmentMenuItem;
     @FXML private Menu settingMenu; 
         @FXML private MenuItem setCalenarRangeMenuItem;
@@ -106,7 +107,7 @@ public class FXMLMainCalendarController implements Initializable {
     private User signedInUser = new User(); 
     private YearMonth currentYearMonth;
     private YearMonth todayYearMonth;
-    private EventsOfADay eventDay; 
+    private ApptManipulator appointmentManipulator; 
 
     /* Constructor */
     public FXMLMainCalendarController() {
@@ -608,8 +609,8 @@ public class FXMLMainCalendarController implements Initializable {
     }    
     
     public void selectOneDateButtonClicked () {
-        LocalDate input = oneDateApptDatePicker.getValue(); 
-        /* Search database all the events on that date */ 
+        /* LocalDate input = oneDateApptDatePicker.getValue(); 
+        /* Search database all the events on that date 
         try {
             DatabaseHandler db = new DatabaseHandler();
             db.connect_CALENDAR();
@@ -622,10 +623,10 @@ public class FXMLMainCalendarController implements Initializable {
             /* Create an ArrayList to store all the events.
              * Each event is considered to be an String array.
              * The format of the String[] is : [date, event_name, start_time, end_time, fk_username]
-            */ 
+            
             ArrayList <Object[]> eventsArrayList = new ArrayList(); 
             while (rs.next()) {
-                /* Get data from database of the user on a specific date */
+                /* Get data from database of the user on a specific date 
                     //Dealing with date. 
                 Date tempDate = rs.getDate("date");
                 LocalDate date = tempDate.toLocalDate();
@@ -637,71 +638,59 @@ public class FXMLMainCalendarController implements Initializable {
                 int tempStartTime = rs.getInt("start_time");
                 int tempEndTime = rs.getInt("end_time");
                 String tempUserName = rs.getNString("fk_username");
-                /* Create an object array to hold all the information */
+                /* Create an object array to hold all the information 
                 Object[] oArr = new Object[] {dateString, tempEventName, 
                     Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName  }; 
-                /* Add that object array into the ArrayList */
+                /* Add that object array into the ArrayList 
                 eventsArrayList.add(oArr);
             }
             
-            /* Create an object EventOfADay in this MainCalendar */
-            eventDay = new EventsOfADay(signedInUser.getUsername(), eventsArrayList); 
-            eventDay.getEventCollection();
-            eventDay.writeToFile();
+            /* Create an object EventOfADay in this MainCalendar 
+            appointmentManipulator = new ApptManipulator(signedInUser.getUsername()); 
+            appointmentManipulator.getEventCollection();
+            appointmentManipulator.writeToFile();
             
             } catch (SQLException ex) {
             Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
-            } 
-    }
+            }  */
+    } 
     
-    public void exportAllButtonPushed () {
+    public void exportAllMenuItemPushed () {
         LocalDate input = oneDateApptDatePicker.getValue(); 
-        /* Search database all the events on that date */ 
-        try {
-            DatabaseHandler db = new DatabaseHandler();
-            db.connect_CALENDAR();
-            String query = "SELECT * FROM EVENTS WHERE DATE BETWEEN ? AND ? AND FK_USERNAME = ?";
-            PreparedStatement pstmt;
-            pstmt = db.conn.prepareStatement(query);
-            pstmt.setString(1, "1900-01-01");
-            pstmt.setString(2, "2099-01-01");
-            pstmt.setString(3, signedInUser.getUsername());
-            ResultSet rs = pstmt.executeQuery();
-            /* Create an ArrayList to store all the events.
-             * Each event is considered to be an String array.
-             * The format of the String[] is : [date, event_name, start_time, end_time, fk_username]
-            */ 
-            ArrayList <Object[]> eventsArrayList = new ArrayList(); 
-            while (rs.next()) {
-                /* Get data from database of the user on a specific date */
-                    //Dealing with date. 
-                Date tempDate = rs.getDate("date");
-                LocalDate date = tempDate.toLocalDate();
-
-                String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
-                System.out.println("dateString: " + dateString);
-                    //Other data
-                String tempEventName = rs.getNString("event_name"); 
-                int tempStartTime = rs.getInt("start_time");
-                int tempEndTime = rs.getInt("end_time");
-                String tempUserName = rs.getNString("fk_username");
-                /* Create an object array to hold all the information */
-                Object[] oArr = new Object[] {dateString, tempEventName, 
-                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName  }; 
-                /* Add that object array into the ArrayList */
-                eventsArrayList.add(oArr);
-            }
+        /* Create an object ApptManipulator in this MainCalendar */
+        appointmentManipulator = new ApptManipulator(signedInUser.getUsername()); 
+        appointmentManipulator.setEventCollection(appointmentManipulator.allEventsOfUser());
+        appointmentManipulator.writeToFile();
             
-            /* Create an object EventOfADay in this MainCalendar */
-            eventDay = new EventsOfADay(signedInUser.getUsername(), eventsArrayList); 
-            eventDay.getEventCollection();
-            eventDay.writeToFile();
-            
-            } catch (SQLException ex) {
-            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
-            } 
     }
     
+    
+    public void importAppointmentMenuItemPushed (ActionEvent event) {
+        
+        try {
+            /*
+                        * Switch to Main Calendar Scene
+                        */
+                        FXMLLoader loader = new FXMLLoader(); 
+                        loader.setLocation(getClass().getResource("FXMLImportAppointments.fxml"));
+                        Parent importParent = loader.load();
+                        Scene importCalendarScene = new Scene(importParent);
+                        
+                        //Access the controller and call a method
+                        FXMLImportAppointmentsController iaController = loader.getController();
+                        
+                        
+                        //Call function in Main Calendar Controller
+                        iaController.initializeScene(signedInUser.getUsername());
+                        
+                        //This line gets stage informaion
+                        Stage window = new Stage(); 
+                        window.setScene(importCalendarScene);
+                        window.show();
+        } catch (IOException ex) {
+            System.out.println("Set Import scene error: " + ex);
+        }
+    }
     
     /************************************** INITIALIZATION **************************************/
     //create method for retreiving event data and refreshing it everything calendar changes.

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLImportAppointmentsController">
+   <children>
+      <AnchorPane prefHeight="532.0" prefWidth="400.0">
+         <children>
+            <Label fx:id="existingApptLabel" layoutX="135.0" layoutY="42.0" text="Existing Appintments" />
+            <TableView fx:id="existingApptTableView" layoutY="79.0" prefHeight="200.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
+               <columns>
+                  <TableColumn fx:id="eDateColumn" editable="false" prefWidth="100.0" text="Date" />
+                  <TableColumn fx:id="eNameColumn" editable="false" prefWidth="100.0" text="Name" />
+                  <TableColumn fx:id="eStartTimeColumn" editable="false" prefWidth="75.0" text="Start Time" />
+                  <TableColumn fx:id="eEndTimeColumn" editable="false" prefWidth="75.0" text="End Time" />
+                  <TableColumn fx:id="eUsernameColumn" editable="false" prefWidth="60.0" resizable="false" text="Username" />
+               </columns></TableView>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="400.0" prefHeight="532.0" prefWidth="400.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <Label fx:id="newApptLabel" layoutX="113.0" layoutY="42.0" text="New Appointments from File" />
+            <TableView fx:id="newApptTableView" layoutX="7.0" layoutY="76.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
+               <columns>
+                  <TableColumn fx:id="nDateColumn" prefWidth="75.0" text="Date" />
+                  <TableColumn fx:id="nNameColumn" prefWidth="75.0" text="Name" />
+                  <TableColumn fx:id="nStartTimeColumn" prefWidth="75.0" text="Start Time" />
+                  <TableColumn fx:id="nEndTimeColumn" prefWidth="75.0" text="End Time" />
+                  <TableColumn fx:id="nUsernameColumn" prefWidth="75.0" text="Username" />
+               </columns></TableView>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutY="531.0" prefHeight="123.0" prefWidth="800.0">
+         <children>
+            <Label fx:id="statusLabel" layoutX="380.0" layoutY="82.0" text="Status" />
+            <Button fx:id="importButton" layoutX="371.0" layoutY="35.0" mnemonicParsing="false" text="Import" />
+            <Button fx:id="populateUserEventButton" layoutX="132.0" layoutY="1.0" mnemonicParsing="false" onAction="#populateUserEventPushed" text="Populate user's events" />
+            <Button fx:id="importFileButton" layoutX="566.0" layoutY="1.0" mnemonicParsing="false" onAction="#importFilePushed" text="Import File" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
