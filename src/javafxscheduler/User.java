@@ -11,6 +11,19 @@ public class User {
     //Connecting to database
     private DatabaseHandler userDB = new DatabaseHandler();
   
+    public User (String f, String l, String e, String u, String p) {
+        firstName = f; 
+        lastName = l; 
+        email = e; 
+        username = u; 
+        password = p; 
+    }
+    
+    public User (String u, String p) {
+        username = u; 
+        password = p;
+    }
+    
     public String getFirstName() {
         return firstName;
     }

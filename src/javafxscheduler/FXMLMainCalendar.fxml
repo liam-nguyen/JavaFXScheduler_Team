@@ -22,8 +22,10 @@
         <menus>
           <Menu fx:id="accountMenu" text="Account">
             <items>
-                  <MenuItem fx:id="changeUsernameMenuItem" mnemonicParsing="false" onAction="#changeUsernameMenuItemPushed" text="Change Username" />
+                  <MenuItem fx:id="changeEmailMenuItem" mnemonicParsing="false" onAction="#changeEmailMenuItemPushed" text="Change Email" />
               <MenuItem fx:id="changePasswordMenuItem" mnemonicParsing="false" onAction="#changePasswordMenuItemPushed" text="Change Password" />
+                  <MenuItem fx:id="changeFirstMenuItem" mnemonicParsing="false" onAction="#changeFirstNameMenuItemPushed" text="Change First Name" />
+                  <MenuItem fx:id="changeLastMenuItem" mnemonicParsing="false" onAction="#changeLastNameMenuItemPushed" text="Change Last Name" />
                   <MenuItem fx:id="accountDetailMenuItem" mnemonicParsing="false" onAction="#accountDetailMenuItemPushed" text="Account Detail" />
                   <MenuItem fx:id="logoutMenuItem" mnemonicParsing="false" onAction="#logOutMenuItemPushed" text="Log Out" />
             </items>
@@ -32,7 +34,6 @@
             <items>
               <MenuItem fx:id="exportAllAppointmentMenuItem" mnemonicParsing="false" onAction="#exportAllMenuItemPushed" text="Export All Appointment" />
                   <MenuItem fx:id="importAppointmentMenuItem" mnemonicParsing="false" onAction="#importAppointmentMenuItemPushed" text="Import All Appointment" />
-                  <MenuItem fx:id="changeAppointmentMenuItem" mnemonicParsing="false" text="Change Appointment" />
             </items>
           </Menu>
           <Menu fx:id="settingMenu" mnemonicParsing="false" text="Setting">

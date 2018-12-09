@@ -65,14 +65,15 @@ public class FXMLMainCalendarController implements Initializable {
         //Items in the Menu
     @FXML private MenuBar menuBar; 
     @FXML private Menu accountMenu; 
-        @FXML private MenuItem changeUsernameMenuItem; 
-        @FXML private MenuItem changePasswordMenuItem; 
+        @FXML private MenuItem changeEmailMenuItem; 
+        @FXML private MenuItem changePasswordMenuItem;
+        @FXML private MenuItem changeFirstMenuItem;
+        @FXML private MenuItem changeLastMenuItem;
         @FXML private MenuItem accountDetailMenuItem; 
         @FXML private MenuItem logoutMenuItem;
     @FXML private Menu appointmentMenu;
         @FXML private MenuItem exportAllAppointmentMenuItem;
         @FXML private MenuItem importAppointmentMenuItem;
-        @FXML private MenuItem changeAppointmentMenuItem;
     @FXML private Menu settingMenu; 
         @FXML private MenuItem setCalenarRangeMenuItem;
         @FXML private MenuItem setCalendarColorMenuItem;
@@ -108,7 +109,7 @@ public class FXMLMainCalendarController implements Initializable {
     
     
     /* Other fields */
-    private User signedInUser = new User(); 
+    private User signedInUser; 
     private YearMonth currentYearMonth;
     private YearMonth todayYearMonth;
     private ApptManipulator appointmentManipulator;
@@ -122,13 +123,11 @@ public class FXMLMainCalendarController implements Initializable {
     /**
      * When this method is called from previous scene, this method will initialize some fields 
      * in the Main Calendar scenes.
-     * @param passingUser: User Object : current logged in user. 
      */
-    public void initializeMainCalendar (User passingUser) 
+    public void initializeMainCalendar (String u, String p) 
     {
         //Initialize data.
-        signedInUser.setUsername(passingUser.getUsername());
-        signedInUser.setPassword(passingUser.getPassword());
+        signedInUser = new User (u, p); 
         todayYearMonth = YearMonth.from(LocalDate.now());
         
         //Initialize Scene elements.
@@ -232,7 +231,6 @@ public class FXMLMainCalendarController implements Initializable {
             LocalDate firstDayOfTheMonth = yearMonth.atDay(1); //date format of first day of the month
             LocalDate lastDayOfTheMonth = yearMonth.atEndOfMonth(); //date format of last day of month 
             String dayRange = "'" + firstDayOfTheMonth + "'" + " AND " + "'" + lastDayOfTheMonth + "'";
-            System.out.println("dayRange" + dayRange);
             String query = "SELECT * FROM EVENTS WHERE FK_USERNAME=? AND DATE BETWEEN " + dayRange; //Find all events made by user in that month
             PreparedStatement pstmt;
             pstmt = eventDB.conn.prepareStatement(query); 
@@ -242,7 +240,6 @@ public class FXMLMainCalendarController implements Initializable {
             while (rs.next()) { 
                 int monthValue = rs.getDate("date").toLocalDate().getDayOfMonth(); 
                 String eventName = rs.getString("event_name"); 
-                System.out.println("retrieveExistingEvents: " + monthValue + eventName);
                 populateExistingEvents(monthValue, eventName);
             }
         } 
@@ -256,13 +253,11 @@ public class FXMLMainCalendarController implements Initializable {
      * @param eventName: the names of the events
      */
     public void populateExistingEvents(int dayOfMonth, String eventName) {
-        System.out.println("populateExistingEvents: dayOfMonth " + dayOfMonth + " eventName " + eventName);
         int firstDayOfMonth = 0;
         /* Get the first day of this month */
         while(!"1".equals(dayArray.get(firstDayOfMonth).getText())) { 
                 firstDayOfMonth++;
             }
-        System.out.println("populateExistingEvents after while: " + firstDayOfMonth);
         /* Find the day on the Calendar that matches with the input dayOfMonth and then populate the events into the table */
         for (int i = firstDayOfMonth; i < 35; i++) { 
             //if (dayArray.get(i).getText() == null ? Integer.toString(dayOfMonth) == null : dayArray.get(i).getText().equals(Integer.toString(dayOfMonth))) {
@@ -337,9 +332,7 @@ public class FXMLMainCalendarController implements Initializable {
                 LocalDate apptLocalDate = apptDatePicker.getValue();
                 String apptName = apptNameTextField.getText();
                 int startTime = startTimeHourComboBox.getSelectionModel().getSelectedIndex() * 60 + startTimeMinComboBox.getSelectionModel().getSelectedIndex();
-                System.out.println("starttime: " + startTime);
                 int endTime = endTimeHourComboBox.getSelectionModel().getSelectedIndex() * 60 + endTimeMinComboBox.getSelectionModel().getSelectedIndex();
-                System.out.println("endtime: " + endTime);
                 /* Check if the input start and end time are valid */
                     boolean validTime = Event.validTime(startTime, endTime);
 
@@ -352,8 +345,6 @@ public class FXMLMainCalendarController implements Initializable {
                     else {
                         //Checking for appointment conflicts.
                         boolean conflicted = Event.apptConflict(signedInUser.getUsername(), apptLocalDate,startTime, endTime); 
-                        System.out.println("Event: " + apptNameTextField.getText() + 
-                            ". Conflicted: " + conflicted); 
                         if (conflicted == false) {
                             //Save data into database sql
                             //Save event infomation into Events table
@@ -412,12 +403,13 @@ public class FXMLMainCalendarController implements Initializable {
             
             //Call function in Account Detail Controller 
                 //and populate the Scene with user's information
-            acController.initCurrentUser(signedInUser);
+            acController.initCurrentUser(signedInUser.getUsername(), signedInUser.getPassword());
             acController.fillInSignedInUserData();
             acController.populateUserInformation();
             
             //This line gets stage informaion
-            Stage window = (Stage)((Node)menuBar).getScene().getWindow();
+            //Stage window = (Stage)((Node)menuBar).getScene().getWindow();
+            Stage window = new Stage(); 
             window.setScene(accountDetailScene);
             window.show();
             
@@ -453,33 +445,37 @@ public class FXMLMainCalendarController implements Initializable {
      * This method changes username.
      * @param event
      */
-    public void changeUsernameMenuItemPushed(ActionEvent event) {
+    public void changeEmailMenuItemPushed(ActionEvent event) {
         try {
             TextInputDialog changeNameDialog = new TextInputDialog();
-            changeNameDialog.setTitle("Username Change");
-            changeNameDialog.setContentText("Please enter your new username");
+            changeNameDialog.setTitle("Email Change");
+            changeNameDialog.setContentText("Please enter your new email");
             //Get response value
-            Optional<String> changeNameresult = changeNameDialog.showAndWait();
+            changeNameDialog.showAndWait();
+            String changeNameresult = changeNameDialog.getEditor().getText(); 
+            
             //If there is an input
-            if(!changeNameDialog.getEditor().getText().equals("")) {
+            if(!changeNameresult.equals("")) {
                 //Get alert confirmation to make sure the user wants to the change. 
                 Alert alert = new Alert(AlertType.CONFIRMATION); 
-                alert.setTitle("Username change confirmation");
+                alert.setTitle("Email change confirmation");
                 alert.setContentText("Are you sure?");
                 Optional<ButtonType> confirmationResult = alert.showAndWait();
                 //If User clicks OK
                 if (confirmationResult.get() == ButtonType.OK) {
                     DatabaseHandler db = new DatabaseHandler();
                     db.connect_CALENDAR();
-                    String query = "UPDATE USERS SET USERNAME = ? WHERE USERNAME=? ";
+                    String query = "UPDATE USERS SET email = ? WHERE username = ? ";
                     PreparedStatement pstmt;
                     pstmt = db.conn.prepareStatement(query);
-                    pstmt.setString(1, changeNameresult.get());
+                    pstmt.setString(1, changeNameresult);
                     pstmt.setString(2, signedInUser.getUsername());
                     pstmt.executeUpdate();
+                    /* Update signedInUser email */
+                    signedInUser.setEmail(changeNameresult);
                 }
                 //If User click Cancel
-                else {changeNameDialog.close();}
+                //else {changeNameDialog.close();}
             }
             // if there is no input
             else {
@@ -503,9 +499,10 @@ public class FXMLMainCalendarController implements Initializable {
             changePassDialog.setTitle("Password Change");
             changePassDialog.setContentText("Please enter your new password");
             //Get response value
-            Optional<String> changeNameresult = changePassDialog.showAndWait();
-             //If there is an input
-            if(!changePassDialog.getEditor().getText().equals("")) {
+            changePassDialog.showAndWait();
+            String newPassword = changePassDialog.getEditor().getText();            
+            //If there is an input
+            if(!newPassword.equals("")) {
                 Alert alert = new Alert(AlertType.CONFIRMATION); 
                 alert.setTitle("Password change confirmation");
                 alert.setContentText("Are you sure?");
@@ -513,12 +510,15 @@ public class FXMLMainCalendarController implements Initializable {
                 DatabaseHandler db = new DatabaseHandler();
                 if (confirmationResult.get() == ButtonType.OK) {
                     db.connect_CALENDAR();
-                    String query = "UPDATE USERS SET PASSWORD = ? WHERE USERNAME=? ";
+                    String query = "UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?";
                     PreparedStatement pstmt;
                     pstmt = db.conn.prepareStatement(query);
-                    pstmt.setString(1, changeNameresult.get());
+                    pstmt.setString(1, newPassword);
                     pstmt.setString(2, signedInUser.getUsername());
                     pstmt.executeUpdate();
+                    
+                    /* Update internal user */
+                    signedInUser.setPassword(newPassword);
                 }
                 else {changePassDialog.close();}
             }
@@ -533,6 +533,97 @@ public class FXMLMainCalendarController implements Initializable {
             System.out.println("changePasswordMenuItemPushed error: " + ex);
         }
    }
+    
+    /**
+     * This method changes password.
+     * @param event
+     */
+    public void changeFirstNameMenuItemPushed(ActionEvent event) {
+        try {
+            TextInputDialog changeFirstDialog = new TextInputDialog();
+            changeFirstDialog.setTitle("First Name Change");
+            changeFirstDialog.setContentText("Please enter your new first name");
+            //Get response value
+            changeFirstDialog.showAndWait();
+            String newFirst = changeFirstDialog.getEditor().getText();            
+            //If there is an input
+            if(!newFirst.equals("")) {
+                Alert alert = new Alert(AlertType.CONFIRMATION); 
+                alert.setTitle("First name change confirmation");
+                alert.setContentText("Are you sure?");
+                Optional<ButtonType> confirmationResult = alert.showAndWait();
+                DatabaseHandler db = new DatabaseHandler();
+                if (confirmationResult.get() == ButtonType.OK) {
+                    db.connect_CALENDAR();
+                    String query = "UPDATE USERS SET first_name = ? WHERE USERNAME = ?";
+                    PreparedStatement pstmt;
+                    pstmt = db.conn.prepareStatement(query);
+                    pstmt.setString(1, newFirst);
+                    pstmt.setString(2, signedInUser.getUsername());
+                    pstmt.executeUpdate();
+                    
+                    /* Update internal user */
+                    signedInUser.setFirstName(newFirst);
+                }
+                else {changeFirstDialog.close();}
+            }
+            //If there is no input
+            else {
+                //Get alert confirmation to make sure the user wants to the change. 
+                Alert alert = new Alert(AlertType.WARNING); 
+                alert.setContentText("First name can't be empty.");
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("changeFirstNameMenuItemPushed error: " + ex);
+        }
+   }
+    
+       /**
+     * This method changes password.
+     * @param event
+     */
+    public void changeLastNameMenuItemPushed(ActionEvent event) {
+        try {
+            TextInputDialog changeLastDialog = new TextInputDialog();
+            changeLastDialog.setTitle("First Name Change");
+            changeLastDialog.setContentText("Please enter your new first name");
+            //Get response value
+            changeLastDialog.showAndWait();
+            String newLast = changeLastDialog.getEditor().getText();            
+            //If there is an input
+            if(!newLast.equals("")) {
+                Alert alert = new Alert(AlertType.CONFIRMATION); 
+                alert.setTitle("First name change confirmation");
+                alert.setContentText("Are you sure?");
+                Optional<ButtonType> confirmationResult = alert.showAndWait();
+                DatabaseHandler db = new DatabaseHandler();
+                if (confirmationResult.get() == ButtonType.OK) {
+                    db.connect_CALENDAR();
+                    String query = "UPDATE USERS SET last_name = ? WHERE USERNAME = ?";
+                    PreparedStatement pstmt;
+                    pstmt = db.conn.prepareStatement(query);
+                    pstmt.setString(1, newLast);
+                    pstmt.setString(2, signedInUser.getUsername());
+                    pstmt.executeUpdate();
+                    
+                    /* Update internal user */
+                    signedInUser.setLastName(newLast);
+                }
+                else {changeLastDialog.close();}
+            }
+            //If there is no input
+            else {
+                //Get alert confirmation to make sure the user wants to the change. 
+                Alert alert = new Alert(AlertType.WARNING); 
+                alert.setContentText("Last name can't be empty.");
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("changeLastNameMenuItemPushed error: " + ex);
+        }
+   }
+    
     
     /**
      * This method moves the month back by one and 

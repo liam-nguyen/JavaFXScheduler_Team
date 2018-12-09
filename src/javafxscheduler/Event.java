@@ -115,7 +115,6 @@ public class Event {
      * @return boolean: true if valid. 
      */
     static public boolean apptConflict (String username, LocalDate apptDate, int startTime, int endTime) {
-        System.out.println("Checking date: " + apptDate);
         boolean conflicted = false;
         try {
             final int HOUR = 24, MIN = 60; 

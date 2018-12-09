@@ -42,7 +42,6 @@ public class FXMLEventChangeController implements Initializable {
     /* Pass the event from previous scene to this scene */
     public void initializeEvent (String date, String name, String start, String end, String username) {
         currentEvent = new Event(date, name, start, end, username); 
-        System.out.println("initializeEvent: " + currentEvent.getEventName());
         /* Update labels */
         EventDateLabel.setText(currentEvent.getEventDate());
         EventNameLabel.setText(currentEvent.getEventName());

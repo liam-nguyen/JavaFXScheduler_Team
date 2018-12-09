@@ -31,19 +31,17 @@ public class FXMLAccountDetailController implements Initializable {
     @FXML private Label userUsernameNameLabel; 
     @FXML private Label userPasswordNameLabel; 
     @FXML private Label userEmailNameLabel; 
-    @FXML private Button backButton; 
     @FXML private Button fillInButton;
     
-    private User signedInUser = new User() ;
+    private User signedInUser;
     
     /**
      * When this method is called, currentUser's fields are initialized 
      *      from previous scene. 
      */
-    public void initCurrentUser (User passingUser) 
+    public void initCurrentUser (String u, String p)  
     {
-        signedInUser.setUsername(passingUser.getUsername());
-        signedInUser.setPassword(passingUser.getPassword());
+        signedInUser = new User(u,p); 
     }
     
     /**
@@ -62,29 +60,6 @@ public class FXMLAccountDetailController implements Initializable {
         userEmailNameLabel.setText(signedInUser.getEmail());
     }
     
-    /**
-     * This method brings user back to the Main Calendar Scene.
-     */
-    public void backButtonPushed(ActionEvent event) {
-        try {
-            /*
-            * Switch to Main Calendar Scene
-            */
-            FXMLLoader loader = new FXMLLoader(); 
-            loader.setLocation(getClass().getResource("FXMLMainCalendar.fxml"));
-            Parent loginParent = loader.load();
-            Scene mainCalendarScene = new Scene(loginParent);
-
-            //This line gets stage informaion
-            Stage window = (Stage)((Node)event.getSource()).getScene().getWindow();
-            window.setScene(mainCalendarScene);
-            window.show();
-        } 
-        catch (IOException ex) {
-            System.out.println("User verified error: " + ex);
-        } 
-    }
-
     /**
      * This method populate data into the signedInUser
      */

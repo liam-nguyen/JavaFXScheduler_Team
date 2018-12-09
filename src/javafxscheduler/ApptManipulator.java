@@ -95,8 +95,8 @@ public class ApptManipulator {
                 LocalDate date = tempDate.toLocalDate();
 
                 String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
-                System.out.println("dateString: " + dateString);
-                    //Other data
+
+                //Other data
                 String tempEventName = rs.getNString("event_name"); 
                 int tempStartTime = rs.getInt("start_time");
                 int tempEndTime = rs.getInt("end_time");
@@ -150,8 +150,7 @@ public class ApptManipulator {
             out = new FileOutputStream(new File(currentUser +  "_Calendar_" + now + ".xlsx"));
             workbook.write(out);
             out.close();
-            System.out.println("Writesheet.xlsx written successfully");
-            System.out.println("Written a file");
+            System.out.println("File xlsx written successfully");
         } catch (FileNotFoundException ex) {
             System.out.println("writeToFile FileNotFound: " + ex);
         } catch (IOException ex) {

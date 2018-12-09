@@ -52,7 +52,7 @@ public class FXMLImportAppointmentsController implements Initializable {
     @FXML private TableColumn nUsernameColumn;
     
     /* Other data */
-    private User signedInUser = new User(); 
+    private User signedInUser; 
     private ArrayList<Event> userEventsArrayList;
     private ArrayList<Event> otherEventsArrayList;
     

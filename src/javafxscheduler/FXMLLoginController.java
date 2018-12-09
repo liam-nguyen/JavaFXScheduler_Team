@@ -116,15 +116,9 @@ public class FXMLLoginController implements Initializable {
                         
                         //Access the controller and call a method
                         FXMLMainCalendarController mcController = loader.getController();
-                        
-                        //Setting up userAttempt
-                        //This store a user attempting to log in. 
-                        User userAttempt = new User();
-                        userAttempt.setUsername(usernameAttempt);
-                        userAttempt.setPassword(passwordAttempt);
-                        
+                                                
                         //Call function in Main Calendar Controller
-                        mcController.initializeMainCalendar(userAttempt);
+                        mcController.initializeMainCalendar(usernameAttempt, passwordAttempt);
                         mcController.populateCalendar(YearMonth.now());
                         
                         //This line gets stage informaion
