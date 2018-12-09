@@ -7,16 +7,17 @@ import java.sql.SQLException;
 
 public class User {
     private String firstName, lastName, email;
-    private String username, password;
-    //Connecting to database
+    private String username, password, phone;
+    
+//Connecting to database
     private DatabaseHandler userDB = new DatabaseHandler();
-  
+   /** Constructor */
     public User (String f, String l, String e, String u, String p) {
         firstName = f; 
         lastName = l; 
         email = e; 
         username = u; 
-        password = p; 
+        password = p;
     }
     
     public User (String u, String p) {
@@ -24,6 +25,7 @@ public class User {
         password = p;
     }
     
+    /* Getters & Setters */
     public String getFirstName() {
         return firstName;
     }
@@ -63,7 +65,17 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
     
+    
+    /** Other methods */
     public boolean verifyAccount() {
         try {
             userDB.connect_CALENDAR();
@@ -84,6 +96,4 @@ public class User {
         }
         return false;
     }
-    
-    
 }

@@ -89,7 +89,16 @@
                   <Label fx:id="userEmailNameLabel" text="User's email" visible="false" />
                </children>
             </StackPane>
-            <StackPane alignment="CENTER_RIGHT" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="5">
+               <children>
+                  <Label fx:id="phoneTitleLabel" text="Phone" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+               <children>
+                  <Label fx:id="userPhoneLabel" text="Phone Number" visible="false" />
+               </children>
+            </StackPane>
          </children>
       </GridPane>
    </children>

@@ -1,22 +1,14 @@
 package javafxscheduler;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 
 public class FXMLAccountDetailController implements Initializable {
 
@@ -26,12 +18,13 @@ public class FXMLAccountDetailController implements Initializable {
     @FXML private Label usernameTitleLabel; 
     @FXML private Label passwordTitleLabel; 
     @FXML private Label emailTitleLabel; 
+    @FXML private Label phoneTitleLabel;
     @FXML private Label userFirstNameLabel; 
     @FXML private Label userLastNameLabel; 
     @FXML private Label userUsernameNameLabel; 
     @FXML private Label userPasswordNameLabel; 
     @FXML private Label userEmailNameLabel; 
-    @FXML private Button fillInButton;
+    @FXML private Label userPhoneLabel; 
     
     private User signedInUser;
     
@@ -53,11 +46,13 @@ public class FXMLAccountDetailController implements Initializable {
         userUsernameNameLabel.setVisible(true);
         userPasswordNameLabel.setVisible(true);
         userEmailNameLabel.setVisible(true);
+        userPhoneLabel.setVisible(true);
         userFirstNameLabel.setText(signedInUser.getFirstName().toUpperCase());
         userLastNameLabel.setText(signedInUser.getLastName().toUpperCase(Locale.ITALY));
         userUsernameNameLabel.setText(signedInUser.getUsername());
         userPasswordNameLabel.setText(signedInUser.getPassword());
         userEmailNameLabel.setText(signedInUser.getEmail());
+        userPhoneLabel.setText(signedInUser.getPhone());
     }
     
     /**
@@ -81,6 +76,7 @@ public class FXMLAccountDetailController implements Initializable {
                 signedInUser.setUsername(rs.getString("username"));
                 signedInUser.setPassword(rs.getString("password"));
                 signedInUser.setEmail(rs.getString("email"));
+                signedInUser.setPhone(rs.getString("phone"));
             }
         }
         catch (SQLException ex) {
