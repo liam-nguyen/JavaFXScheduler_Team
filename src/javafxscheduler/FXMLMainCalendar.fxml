@@ -455,6 +455,7 @@
                   <Label layoutX="18.0" layoutY="24.0" text="CHOOSE A DATE TO VIEW" />
                   <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" AnchorPane.rightAnchor="6.5" />
                   <Button fx:id="removeEventButton" layoutX="134.0" layoutY="386.0" mnemonicParsing="false" onAction="#removeButtonPushed" text="Remove" AnchorPane.rightAnchor="6.0" />
+                  <Button fx:id="changeEventButton" layoutY="386.0" mnemonicParsing="false" onAction="#changeEventButton" text="Change" />
                </children>
             </AnchorPane>
          </children>

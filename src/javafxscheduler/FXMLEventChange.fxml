@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLEventChangeController">
+   <children>
+      <Label layoutX="7.0" layoutY="6.0" text="Event Details">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER" layoutX="1.0" layoutY="134.0" prefHeight="43.0" prefWidth="601.0" spacing="70.0">
+         <children>
+            <TextField fx:id="EventNameTextField" prefHeight="27.0" prefWidth="75.0" />
+            <TextField fx:id="EventDateTextField" prefHeight="27.0" prefWidth="75.0" />
+            <TextField fx:id="EventStartTimeTextField" prefHeight="27.0" prefWidth="75.0" />
+            <TextField fx:id="EventEndTimeTextField" prefHeight="27.0" prefWidth="75.0" />
+         </children>
+      </HBox>
+      <AnchorPane layoutX="1.0" layoutY="91.0" prefHeight="43.0" prefWidth="600.0">
+         <children>
+            <Label fx:id="EventNameLabel" layoutX="56.0" layoutY="15.0" text="Name" AnchorPane.leftAnchor="56.0">
+               <padding>
+                  <Insets right="20.0" />
+               </padding>
+            </Label>
+            <Label fx:id="EventDateLabel" layoutX="194.0" layoutY="15.0" text="Date" AnchorPane.leftAnchor="194.0">
+               <padding>
+                  <Insets right="20.0" />
+               </padding>
+            </Label>
+            <Label fx:id="EventStartTimeLabel" layoutX="339.0" layoutY="13.0" text="Start Time" AnchorPane.leftAnchor="339.0">
+               <padding>
+                  <Insets right="20.0" />
+               </padding>
+            </Label>
+            <Label fx:id="EventEndTimeLabel" layoutX="486.0" layoutY="13.0" text="End Time" AnchorPane.leftAnchor="486.0">
+               <padding>
+                  <Insets right="20.0" />
+               </padding>
+            </Label>
+         </children>
+      </AnchorPane>
+      <Button fx:id="EventNameButton" layoutX="51.0" layoutY="204.0" mnemonicParsing="false" onAction="#changeNameButton" text="Change" />
+      <Button fx:id="EventDateButton" layoutX="200.0" layoutY="204.0" mnemonicParsing="false" onAction="#dateChangeButton" text="Change" />
+      <Button fx:id="EventStartTimeButton" layoutX="339.0" layoutY="204.0" mnemonicParsing="false" onAction="#startTimeChangeButton" text="Change" />
+      <Button fx:id="EventEndTimeButton" layoutX="486.0" layoutY="204.0" mnemonicParsing="false" onAction="#endTimeChangeButton" text="Change" />
+      <Label fx:id="statusLabel" layoutX="449.0" layoutY="256.0" text="Status" AnchorPane.bottomAnchor="27.0" AnchorPane.rightAnchor="13.5" AnchorPane.topAnchor="256.0">
+         <padding>
+            <Insets left="50.0" right="50.0" />
+         </padding>
+      </Label>
+   </children>
+</AnchorPane>

@@ -42,13 +42,8 @@ public class Event {
         startTime = start; 
         endTime = end; 
         fkUserName = username;
-        /* Convert back to real hour and minutes for start and end time */
-        int startValue = Integer.parseInt(start); 
-        int endValue = Integer.parseInt(end);
-        DecimalFormat formatter = new DecimalFormat("00"); 
-
-        realStartTime = Integer.toString(startValue / 60) + ":" + formatter.format(startValue % 60); 
-        realEndTime = Integer.toString(endValue / 60) + ":" + formatter.format(endValue % 60); 
+        realStartTime = Event.convertMinutesIntoHourMins(start); 
+        realEndTime = Event.convertMinutesIntoHourMins(end); 
     }
     
     public Event(String eventName) {
@@ -165,4 +160,29 @@ public class Event {
         }
         return conflicted; 
     }
+    
+    /**
+     * This method converts a string of time in minutes into proper hour and minute. 
+     * @param timeInMinutes
+     * @return 
+     */
+    static public String convertMinutesIntoHourMins (String timeInMinutes) {
+        int timeInMinuteValue = Integer.parseInt(timeInMinutes); 
+        DecimalFormat formatter = new DecimalFormat("00"); 
+        String realTime = Integer.toString(timeInMinuteValue / 60) + ":" + formatter.format(timeInMinuteValue % 60); 
+        return realTime; 
+    }
+    
+    /**
+     * This method converts a string of hour and minutes in minutes into minutes.
+     * @param properTime
+     * @return 
+     */
+    static public String convertToOnlyMinutes (String properTime) {
+        String[] parseDateString = properTime.split(":");
+        String result = Integer.toString(Integer.parseInt(parseDateString[0])* 60 + Integer.parseInt(parseDateString[1])); 
+        return result; 
+    }
+    
+    
 }
