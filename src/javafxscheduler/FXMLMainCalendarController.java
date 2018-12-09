@@ -1,9 +1,7 @@
 package javafxscheduler;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,7 +37,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 //import jfxtras.scene.control.CalendarPicker;
 
@@ -176,72 +173,7 @@ public class FXMLMainCalendarController implements Initializable {
         retrieveExistingEvents(yearMonth);
     }
     
-    /************************************** LOGIC **************************************/
-    /** This method checks if the input start time and end time are valid.
-     * @param startTime: event's start time.
-     * @param endTime: event's end time
-     * @return 
-     */
-    public boolean validTime (int startTime, int endTime) {
-        boolean valid = true; 
-        //Check if the HOUR of end time is after start time
-        if (startTime >= endTime) {
-            valid = false; 
-        }
-        return valid;
-    }
-    
-        /**
-     * This method checks if new appointment conflicts with current appointment. 
-     * @return boolean: true if valid. 
-     */
-    public boolean apptConflict (LocalDate apptDate, int startTime, int endTime) {
-        System.out.println("Checking date: " + apptDate);
-        boolean conflicted = false;
-        try {
-            final int HOUR = 24, MIN = 60; 
-            boolean dayBlock[] = new boolean [HOUR*MIN];
-            
-            //Initialize the dayBlock
-            for (int i = 0; i < HOUR * MIN; i++) {
-                dayBlock[i] = true;
-            }
-            
-            //Check if there is any appointment happens on the same date.
-            DatabaseHandler db = new DatabaseHandler();
-            db.connect_CALENDAR();
-            String query = "SELECT * FROM EVENTS WHERE fk_username=? AND date = ?";
-            PreparedStatement pstmt = db.conn.prepareStatement(query);
-            pstmt.setString(1, signedInUser.getUsername());
-            pstmt.setString(2, String.valueOf(apptDate));
-            ResultSet rs = pstmt.executeQuery();
-            
-            //If there is a result, there is a potential conflict. 
-            if (rs.isBeforeFirst()) {
-                while (rs.next()) {
-                    //Get value from database
-                    Date sqlDate = rs.getDate("date"); 
-                    LocalDate sqlLocalDate = sqlDate.toLocalDate();
-                    int sqlStartHour = rs.getInt("start_time");
-                    int sqlStartMin = rs.getInt("end_time");
-                    //Mark all the busy minutes. 
-                    for (int i = sqlStartHour; i < sqlStartMin; i++) {
-                        dayBlock[i] = false;
-                    }
-                    for (int i = startTime; i < endTime; i++) {
-                        if (dayBlock[i] == false) {
-                            conflicted = true;
-                            break; 
-                        }
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            System.out.println("apptConflict Error: " + ex);
-        }
-        return conflicted; 
-    }
-    
+    /************************************** LOGIC **************************************/   
     //Set the calendar to DatePicker's date
     public void setCalToDatePicker() {
         //Use apptDatePicker.getValue().getmonnth and stuff to set the event to the calendar
@@ -376,7 +308,7 @@ public class FXMLMainCalendarController implements Initializable {
                 int endTime = endTimeHourComboBox.getSelectionModel().getSelectedIndex() * 60 + endTimeMinComboBox.getSelectionModel().getSelectedIndex();
                 System.out.println("endtime: " + endTime);
                 /* Check if the input start and end time are valid */
-                    boolean validTime = validTime(startTime, endTime);
+                    boolean validTime = Event.validTime(startTime, endTime);
 
                     if (validTime == false) {
                         Alert alert = new Alert(AlertType.WARNING);
@@ -386,7 +318,7 @@ public class FXMLMainCalendarController implements Initializable {
 
                     else {
                         //Checking for appointment conflicts.
-                        boolean conflicted = apptConflict(apptLocalDate,startTime, endTime); 
+                        boolean conflicted = Event.apptConflict(signedInUser.getUsername(), apptLocalDate,startTime, endTime); 
                         System.out.println("Event: " + apptNameTextField.getText() + 
                             ". Conflicted: " + conflicted); 
                         if (conflicted == false) {
@@ -671,7 +603,6 @@ public class FXMLMainCalendarController implements Initializable {
     }
     
     public void importAppointmentMenuItemPushed (ActionEvent event) {
-        
         try {
             /*
                         * Switch to Main Calendar Scene

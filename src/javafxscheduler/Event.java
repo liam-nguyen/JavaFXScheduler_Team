@@ -6,7 +6,11 @@
 package javafxscheduler;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 
 /**
  *
@@ -95,4 +99,70 @@ public class Event {
         this.eventDate = eventDate.toString();
     }
     
+    
+    /** This method checks if the input start time and end time are valid.
+     * @param startTime: event's start time.
+     * @param endTime: event's end time
+     * @return 
+     */
+    static public boolean validTime (int startTime, int endTime) {
+        boolean valid = true; 
+        //Check if the HOUR of end time is after start time
+        if (startTime >= endTime) {
+            valid = false; 
+        }
+        return valid;
+    }
+    
+    
+        /**
+     * This method checks if new appointment conflicts with current appointment. 
+     * @return boolean: true if valid. 
+     */
+    static public boolean apptConflict (String username, LocalDate apptDate, int startTime, int endTime) {
+        System.out.println("Checking date: " + apptDate);
+        boolean conflicted = false;
+        try {
+            final int HOUR = 24, MIN = 60; 
+            boolean dayBlock[] = new boolean [HOUR*MIN];
+            
+            //Initialize the dayBlock
+            for (int i = 0; i < HOUR * MIN; i++) {
+                dayBlock[i] = true;
+            }
+            
+            //Check if there is any appointment happens on the same date.
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM EVENTS WHERE fk_username=? AND date = ?";
+            PreparedStatement pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, username);
+            pstmt.setString(2, String.valueOf(apptDate));
+            ResultSet rs = pstmt.executeQuery();
+            
+            //If there is a result, there is a potential conflict. 
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    //Get value from database
+                    Date sqlDate = rs.getDate("date"); 
+                    LocalDate sqlLocalDate = sqlDate.toLocalDate();
+                    int sqlStartHour = rs.getInt("start_time");
+                    int sqlStartMin = rs.getInt("end_time");
+                    //Mark all the busy minutes. 
+                    for (int i = sqlStartHour; i < sqlStartMin; i++) {
+                        dayBlock[i] = false;
+                    }
+                    for (int i = startTime; i < endTime; i++) {
+                        if (dayBlock[i] == false) {
+                            conflicted = true;
+                            break; 
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("apptConflict Error: " + ex);
+        }
+        return conflicted; 
+    }
 }

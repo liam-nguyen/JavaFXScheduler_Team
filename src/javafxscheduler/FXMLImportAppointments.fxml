@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
@@ -10,7 +11,7 @@
    <children>
       <AnchorPane prefHeight="532.0" prefWidth="400.0">
          <children>
-            <Label fx:id="existingApptLabel" layoutX="135.0" layoutY="42.0" text="Existing Appintments" />
+            <Label fx:id="existingApptLabel" layoutX="150.0" layoutY="44.0" text="USER'S EVENTS" />
             <TableView fx:id="existingApptTableView" layoutY="79.0" prefHeight="200.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
                <columns>
                   <TableColumn fx:id="eDateColumn" editable="false" prefWidth="100.0" text="Date" />
@@ -23,7 +24,7 @@
       </AnchorPane>
       <AnchorPane layoutX="400.0" prefHeight="532.0" prefWidth="400.0" AnchorPane.rightAnchor="0.0">
          <children>
-            <Label fx:id="newApptLabel" layoutX="113.0" layoutY="42.0" text="New Appointments from File" />
+            <Label fx:id="newApptLabel" layoutX="123.0" layoutY="42.0" text="NEW EVENTS FROM FILE" />
             <TableView fx:id="newApptTableView" layoutX="7.0" layoutY="76.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
                <columns>
                   <TableColumn fx:id="nDateColumn" prefWidth="75.0" text="Date" />
@@ -36,10 +37,13 @@
       </AnchorPane>
       <AnchorPane layoutY="531.0" prefHeight="123.0" prefWidth="800.0">
          <children>
-            <Label fx:id="statusLabel" layoutX="380.0" layoutY="82.0" text="Status" />
-            <Button fx:id="importButton" layoutX="371.0" layoutY="35.0" mnemonicParsing="false" text="Import" />
-            <Button fx:id="populateUserEventButton" layoutX="132.0" layoutY="1.0" mnemonicParsing="false" onAction="#populateUserEventPushed" text="Populate user's events" />
-            <Button fx:id="importFileButton" layoutX="566.0" layoutY="1.0" mnemonicParsing="false" onAction="#importFilePushed" text="Import File" />
+            <Label fx:id="statusLabel" layoutX="320.0" layoutY="62.0" text="Status">
+               <padding>
+                  <Insets bottom="20.0" left="60.0" right="60.0" top="20.0" />
+               </padding></Label>
+            <Button fx:id="mergeEventButton" layoutX="348.0" layoutY="28.0" mnemonicParsing="false" onAction="#mergeEventButtonPushed" text="Merge Events" />
+            <Button fx:id="populateUserEventButton" layoutX="121.0" layoutY="1.0" mnemonicParsing="false" onAction="#populateUserEventPushed" text="Populate user's events" />
+            <Button fx:id="importFileButton" layoutX="554.0" layoutY="1.0" mnemonicParsing="false" onAction="#importFilePushed" text="Import File" />
          </children>
       </AnchorPane>
    </children>
