@@ -2,6 +2,7 @@ package javafxscheduler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +15,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -54,7 +57,8 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private ComboBox endTimeHourComboBox; 
     @FXML private ComboBox endTimeMinComboBox;
     @FXML private Button saveApptButton;
-    @FXML private Button selectOneDateButton; 
+    @FXML private Button selectOneDateButton;
+    @FXML private Button removeEventButton; 
     
             
         //Items in the Menu
@@ -79,7 +83,9 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private Button nextMonthButton;
     @FXML private Button todayButton;
     @FXML private TableView<Event> oneDayTableView; 
-    @FXML private TableColumn oneDayTableColumn; 
+    @FXML private TableColumn oneDayNameTableColumn; 
+    @FXML private TableColumn oneDayStartTimeTableColumn; 
+    @FXML private TableColumn oneDayEndTimeTableColumn; 
     
     /* Calendar part */
     @FXML private TableView<Event> t1; @FXML private TableView<Event> t2; @FXML private TableView<Event> t3; @FXML private TableView<Event> t4; @FXML private TableView<Event> t5;
@@ -104,7 +110,7 @@ public class FXMLMainCalendarController implements Initializable {
     private User signedInUser = new User(); 
     private YearMonth currentYearMonth;
     private YearMonth todayYearMonth;
-    private ApptManipulator appointmentManipulator; 
+    private ApptManipulator appointmentManipulator;
 
     /* Constructor */
     public FXMLMainCalendarController() {
@@ -265,7 +271,33 @@ public class FXMLMainCalendarController implements Initializable {
            }
         }
     }
-     
+
+    /* This method deletes the events in the user's database */
+    public void deleteData() {
+        try {
+        DatabaseHandler db = new DatabaseHandler();
+        db.connect_CALENDAR();
+        PreparedStatement pstmt;
+        String query; 
+        Event ev = t1.getSelectionModel().getSelectedItem();
+        for (int i = 0; i < 35; i++) {
+            if (!eventInDayArray.get(i).getSelectionModel().isEmpty()) {
+                 ev = (Event) eventInDayArray.get(i).getSelectionModel().getSelectedItem();
+                 break;
+        }
+        }
+        query = "DELETE FROM EVENTS WHERE event_name = ? AND fk_username=?";
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, ev.getEventName());
+            pstmt.setString(2, signedInUser.getUsername());
+            pstmt.executeUpdate();
+
+            } catch (SQLException e) {
+                System.err.println(e.getMessage() + "--- setup calendar table");
+            }
+    }
+    
+    
     /************************************** CLICK EVENTS **************************************/
     /**
      * This method is called when saveButton is clicked.
@@ -527,7 +559,7 @@ public class FXMLMainCalendarController implements Initializable {
     }
     
     /**
-     * ?????
+     * When clicked on table, get the date and set it to the date picker.
      * @param event 
      */
     public void tableViewClicked(MouseEvent event) {
@@ -547,8 +579,8 @@ public class FXMLMainCalendarController implements Initializable {
     }    
     
     public void selectOneDateButtonClicked () {
-        /* LocalDate input = oneDateApptDatePicker.getValue(); 
-        /* Search database all the events on that date 
+        LocalDate input = oneDateApptDatePicker.getValue(); 
+        /* Search database all the events on that date */
         try {
             DatabaseHandler db = new DatabaseHandler();
             db.connect_CALENDAR();
@@ -560,38 +592,72 @@ public class FXMLMainCalendarController implements Initializable {
             ResultSet rs = pstmt.executeQuery();
             /* Create an ArrayList to store all the events.
              * Each event is considered to be an String array.
-             * The format of the String[] is : [date, event_name, start_time, end_time, fk_username]
+             * The format of the String[] is : [date, event_name, start_time, end_time, fk_username] */
             
-            ArrayList <Object[]> eventsArrayList = new ArrayList(); 
+            ArrayList <Event> eventsArrayList = new ArrayList<>(); 
             while (rs.next()) {
-                /* Get data from database of the user on a specific date 
+                /* Get data from database of the user on a specific date  */
                     //Dealing with date. 
                 Date tempDate = rs.getDate("date");
                 LocalDate date = tempDate.toLocalDate();
-
                 String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
-                System.out.println("dateString: " + dateString);
                     //Other data
                 String tempEventName = rs.getNString("event_name"); 
                 int tempStartTime = rs.getInt("start_time");
                 int tempEndTime = rs.getInt("end_time");
                 String tempUserName = rs.getNString("fk_username");
-                /* Create an object array to hold all the information 
-                Object[] oArr = new Object[] {dateString, tempEventName, 
-                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName  }; 
-                /* Add that object array into the ArrayList 
-                eventsArrayList.add(oArr);
+                /* Create an object array to hold all the information */
+                Event event = new Event(dateString, tempEventName, 
+                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName); 
+                /* Add that event into the ArrayList */
+                eventsArrayList.add(event);
             }
             
-            /* Create an object EventOfADay in this MainCalendar 
-            appointmentManipulator = new ApptManipulator(signedInUser.getUsername()); 
-            appointmentManipulator.getEventCollection();
-            appointmentManipulator.writeToFile();
-            
-            } catch (SQLException ex) {
-            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
-            }  */
+            /* Convert ArrayList into ObservableList */
+            ObservableList<Event> obsEventsArr = FXCollections.observableArrayList(eventsArrayList); //Tableview uses observableArrayList
+
+            /* Add that array into the tableview */
+            oneDayTableView.setItems(obsEventsArr);
+            oneDayNameTableColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
+            oneDayStartTimeTableColumn.setCellValueFactory(new PropertyValueFactory<>("RealStartTime"));
+            oneDayEndTimeTableColumn.setCellValueFactory(new PropertyValueFactory<>("RealEndTime"));
+        } catch (SQLException ex) {
+            System.out.println("selectOneDateButtonClicked Error: " + ex);
+        } 
     } 
+    
+    /**
+     * This method is for removeButton.
+     */
+    public void removeButtonPushed(ActionEvent event) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setContentText("This action is permanent. Are you sure?");
+        Optional<ButtonType> confirmationResult = alert.showAndWait();
+        //If User clicks OK
+        if (confirmationResult.get() == ButtonType.OK) {
+            try {
+                DatabaseHandler db = new DatabaseHandler();
+                db.connect_CALENDAR();
+                PreparedStatement pstmt;
+                String query; 
+                Event ev = oneDayTableView.getSelectionModel().getSelectedItem();
+                query = "DELETE FROM EVENTS WHERE event_name = ? AND fk_username=? "
+                        + "AND start_time = ? AND end_time = ?";
+                pstmt = db.conn.prepareStatement(query);
+                pstmt.setString(1, ev.getEventName());
+                pstmt.setString(2, signedInUser.getUsername());
+                pstmt.setString(3, ev.getStartTime());
+                pstmt.setString(4, ev.getEndTime());
+                pstmt.executeUpdate();
+
+                /* Update the tableview */
+                selectOneDateButtonClicked ();
+            } catch (SQLException ex) {
+                System.err.println("removeButtonPushed: " + ex);
+            }
+        }
+    }
+    
     
     public void exportAllMenuItemPushed () {
         LocalDate input = oneDateApptDatePicker.getValue(); 
