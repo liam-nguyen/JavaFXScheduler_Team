@@ -292,7 +292,8 @@ public class FXMLMainCalendarController implements Initializable {
             
             LocalDate firstDayOfTheMonth = yearMonth.atDay(1); //date format of first day of the month
             LocalDate lastDayOfTheMonth = yearMonth.atEndOfMonth(); //date format of last day of month 
-            String dayRange = "'" + firstDayOfTheMonth + "'" + " AND " + "'" + lastDayOfTheMonth + "'"; 
+            String dayRange = "'" + firstDayOfTheMonth + "'" + " AND " + "'" + lastDayOfTheMonth + "'";
+            System.out.println("dayRange" + dayRange);
             String query = "SELECT * FROM EVENTS WHERE FK_USERNAME=? AND DATE BETWEEN " + dayRange; //Find all events made by user in that month
             PreparedStatement pstmt;
             pstmt = eventDB.conn.prepareStatement(query); 
@@ -300,7 +301,10 @@ public class FXMLMainCalendarController implements Initializable {
             ResultSet rs = pstmt.executeQuery(); 
             /* All events made by user in a given yearMonth */
             while (rs.next()) { 
-                populateExistingEvents(rs.getDate("date").toLocalDate().getDayOfMonth(), rs.getString("event_name"));
+                int monthValue = rs.getDate("date").toLocalDate().getDayOfMonth(); 
+                String eventName = rs.getString("event_name"); 
+                System.out.println("retrieveExistingEvents: " + monthValue + eventName);
+                populateExistingEvents(monthValue, eventName);
             }
         } 
             catch (SQLException ex) {
@@ -313,11 +317,13 @@ public class FXMLMainCalendarController implements Initializable {
      * @param eventName: the names of the events
      */
     public void populateExistingEvents(int dayOfMonth, String eventName) {
+        System.out.println("populateExistingEvents: dayOfMonth " + dayOfMonth + " eventName " + eventName);
         int firstDayOfMonth = 0;
         /* Get the first day of this month */
         while(!"1".equals(dayArray.get(firstDayOfMonth).getText())) { 
                 firstDayOfMonth++;
             }
+        System.out.println("populateExistingEvents after while: " + firstDayOfMonth);
         /* Find the day on the Calendar that matches with the input dayOfMonth and then populate the events into the table */
         for (int i = firstDayOfMonth; i < 35; i++) { 
             //if (dayArray.get(i).getText() == null ? Integer.toString(dayOfMonth) == null : dayArray.get(i).getText().equals(Integer.toString(dayOfMonth))) {
@@ -663,7 +669,6 @@ public class FXMLMainCalendarController implements Initializable {
         appointmentManipulator.writeToFile();
             
     }
-    
     
     public void importAppointmentMenuItemPushed (ActionEvent event) {
         

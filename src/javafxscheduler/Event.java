@@ -48,6 +48,10 @@ public class Event {
     }
     
     public Event(String eventName) {
+        this.eventName = eventName; 
+    }
+    
+    public Event() {
         this.eventName = eventName;
     }
 
@@ -87,7 +91,7 @@ public class Event {
         return eventDate;
     }
 
-    public void setEventDate(Date eventDate) {
+    public void setEventDate(String eventDate) {
         this.eventDate = eventDate.toString();
     }
     

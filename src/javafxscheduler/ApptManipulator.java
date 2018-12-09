@@ -9,6 +9,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import org.apache.poi.ss.usermodel.Cell;
@@ -16,7 +18,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.Iterator;
-import static javafx.collections.FXCollections.observableArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.Row;
 
 
@@ -24,7 +27,7 @@ public class ApptManipulator {
     /*********** Fields ***********/ 
 
     private String currentUser;
-    private ArrayList eventCollection;
+    private ArrayList<Event> eventCollection;
     
     /*********** Constructor, Getters and Setters ***********
     /* Constructor
@@ -33,6 +36,14 @@ public class ApptManipulator {
      */
     public ApptManipulator (String user) {
         currentUser = user; 
+    }
+    
+    /* Constructor
+     * @param user
+     * @param coll 
+     */
+    public ApptManipulator () {
+        currentUser = ""; 
     }
     
     /* Setters and Getters */
@@ -44,12 +55,6 @@ public class ApptManipulator {
     }
 
     public ArrayList getEventCollection() {
-        for (int i = 0; i < eventCollection.size(); i++) {
-            Object[] objectArr = (Object[]) eventCollection.get(i);
-            for (Object o : objectArr) {
-                System.out.print(o + " ");
-            }
-        }
         return eventCollection;
         
     }
@@ -121,16 +126,23 @@ public class ApptManipulator {
             XSSFSheet spreadsheet = workbook.createSheet("Event of a day");
             //Create row object
             XSSFRow row;
+                        
             for (int rowid = 0; rowid < eventCollection.size(); rowid++) {
                 //Create a new row for each iteration.
                 row = spreadsheet.createRow(rowid);
-                Object[] objectArr = (Object[]) eventCollection.get(rowid);
                 
-                int cellid = 0;
-                for (Object obj : objectArr) {
-                    Cell cell = row.createCell(cellid++);
-                    cell.setCellValue((String) obj);
-                }
+                Event objectArr = eventCollection.get(rowid);
+           
+                Cell cell = row.createCell(0);
+                cell.setCellValue(objectArr.getEventDate());
+                cell = row.createCell(1);
+                cell.setCellValue(objectArr.getEventName());
+                cell = row.createCell(2);
+                cell.setCellValue(objectArr.getStartTime());
+                cell = row.createCell(3);
+                cell.setCellValue(objectArr.getEndTime());
+                cell = row.createCell(4);
+                cell.setCellValue(objectArr.getFkUserName());  
             }
             LocalDate now = LocalDate.now(); 
            
@@ -150,13 +162,34 @@ public class ApptManipulator {
     /**
      * This methods read an Excel file to get appointment.
      */
-    public void readFile (File userFile) {
+    public ArrayList <Event> readFile (File userFile) {
+        ArrayList <Event> otherUserEventsArrayList = new ArrayList(); 
         try {
             FileInputStream fis = new FileInputStream(userFile);
             XSSFWorkbook workbook = new XSSFWorkbook(fis);
             XSSFSheet spreadsheet = workbook.getSheetAt(0);
             Iterator < Row >  rowIterator = spreadsheet.iterator();
-            
+            XSSFRow row; 
+           
+            while (rowIterator.hasNext()) {
+                row = (XSSFRow) rowIterator.next(); 
+                Iterator < Cell >  cellIterator = row.cellIterator();
+                
+                String[] stringRow = new String[5];
+                int index = 0; 
+                while (cellIterator.hasNext()) {
+                    Cell cell = cellIterator.next();
+                    stringRow[index] = cell.getStringCellValue();
+                    index++;
+                }
+                
+                
+                //Save the stringRow into the Event object. 
+                Event tempEvent = new Event(stringRow[0], stringRow[1], stringRow[2], stringRow[3], stringRow[4]); 
+                
+                //Add that to the arraylist
+                otherUserEventsArrayList.add(tempEvent);
+            }  
             
         } catch (FileNotFoundException ex) {
             System.out.println("readFile: File not Found. " + ex);
@@ -164,6 +197,6 @@ public class ApptManipulator {
             System.out.println("readFile: IOException " + ex);      
         }
          
-
+        return otherUserEventsArrayList;  
     }
 }
