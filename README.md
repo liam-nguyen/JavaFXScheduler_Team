@@ -10,7 +10,8 @@ The libraries used in this project are:
 3) Javax Mail 1.6.2 - https://javaee.github.io/javamail/#Download_JavaMail_Release
 - This is to send email reminder to user. 
 
-The project was written in Javafx FXML style.
+--> Import these jar files before compiling.
+The project was written mainly in Javafx FXML style.
 
 Note: 
 - After the user logs in, the program will run a daemon thread to get appointments of today 
