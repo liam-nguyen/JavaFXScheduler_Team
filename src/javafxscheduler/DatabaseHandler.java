@@ -53,9 +53,11 @@ public class DatabaseHandler {
                     "last_name varchar(32) not NULL, " +
                     "username varchar(32) PRIMARY KEY, " +
                     "password varchar(32) not NULL, " +
-                    "email varchar(32) not NULL, "
-                    + "phone varchar(32)"
-                    + ")";
+                    "email varchar(32) not NULL, " +
+                    "phone varchar(32), " + 
+                    "preference varchar(32) not NULL, " + 
+                    "reminderTime varchar(32), " + 
+                    "provider varchar(32))"; 
             stmt.execute(query);
             
             //Create table CALENDAR

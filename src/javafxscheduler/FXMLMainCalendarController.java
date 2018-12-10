@@ -10,17 +10,20 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,6 +31,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -40,6 +44,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 //import jfxtras.scene.control.CalendarPicker;
 
@@ -48,6 +57,9 @@ public class FXMLMainCalendarController implements Initializable {
     /*
     * All items in Main Calendar Scene
     */
+    @FXML private AnchorPane mainPane; 
+    @FXML private ColorPicker colorPicker; 
+
     @FXML private Label currentUsernameInfo; 
     @FXML private DatePicker apptDatePicker;
     @FXML private DatePicker oneDateApptDatePicker;
@@ -75,7 +87,8 @@ public class FXMLMainCalendarController implements Initializable {
         @FXML private MenuItem exportAllAppointmentMenuItem;
         @FXML private MenuItem importAppointmentMenuItem;
     @FXML private Menu settingMenu; 
-        @FXML private MenuItem setCalenarRangeMenuItem;
+        @FXML private MenuItem changeToPhoneMenuItem;
+        @FXML private MenuItem changeToEmailMenuItem;
         @FXML private MenuItem setCalendarColorMenuItem;
     @FXML private Menu helpMenu; 
    
@@ -127,7 +140,11 @@ public class FXMLMainCalendarController implements Initializable {
     public void initializeMainCalendar (String u, String p) 
     {
         //Initialize data.
-        signedInUser = new User (u, p); 
+        signedInUser = new User (u, p);
+        
+        //Filled in user's data
+        fillInSignedInUserData();
+        
         todayYearMonth = YearMonth.from(LocalDate.now());
         
         //Initialize Scene elements.
@@ -147,7 +164,66 @@ public class FXMLMainCalendarController implements Initializable {
         startTimeMinComboBox.getItems().addAll(intList);
         endTimeHourComboBox.getItems().addAll(hourList);
         endTimeMinComboBox.getItems().addAll(intList);
+        
+        /** Create a thread to send email to user */ 
+
+            
+        // Run in a second
+        final long INTERVAL = 60000; //Every 1 minutes 
+        
+        /* Email address to send to */
+        String sendTo = signedInUser.getEmail();
+        if (signedInUser.getPreference().equals("phone")) {
+             sendTo = signedInUser.getPhone() + "@tmomail.net"; 
+        }
+        SendEmail sendEmail = new SendEmail(sendTo);
+        
+        /* Create a running thread to send the email */
+        Runnable runnable = new Runnable() {
+            public void run() {
+                while(true) {
+                    System.out.println("Wake up");
+                    /* Get array of events for today */
+                    LocalDate now = LocalDate.now();
+                    ArrayList <Event> eventsArrayList = getEventArrayList(now); 
+                    for (int i = 0; i < eventsArrayList.size(); i++) {
+                        System.out.println("Loop #: " + i);
+                        Event ev = eventsArrayList.get(i);
+                        /* Start time - ReminderTime */
+                        int rewindTime = Integer.parseInt(ev.getStartTime()) - Integer.parseInt(signedInUser.getReminderTime());
+                        System.out.println("difference " + rewindTime);
+                        Calendar rightNow = Calendar.getInstance();
+                        int hour = rightNow.get(Calendar.HOUR_OF_DAY);
+                        int min = rightNow.get(Calendar.MINUTE); 
+                        int currentMins = hour * 60 + min; 
+                        System.out.println("currentMins " + currentMins);
+                        /* Only send reminder if the event hasn't occured yet. */
+                        System.out.println("ev.getStartTime(): " + ev.getStartTime());
+                        if (currentMins > rewindTime && currentMins < Integer.parseInt(ev.getStartTime())) {
+                            System.out.println("About to send ");
+                             /* Send email to that email address */
+                             String message = "Reminder. You have an appointment. Here is the detail: \n" + ev.getEventName() + " - " + ev.getRealStartTime() + " - " + ev.getRealEndTime();
+                             sendEmail.send(message); 
+                             System.out.println("Sent Email ");
+                        }
+                    }
+ 
+                try {
+                    System.out.println("Sleep");
+                    Thread.sleep(INTERVAL);
+                }  catch (InterruptedException e) {	
+                     e.printStackTrace();
+                }
+                }
+            }
+        };
+               
+        Thread thread = new Thread(runnable); 
+        thread.setDaemon(true);
+        thread.start(); 
+        
     }
+    
     
      /**
      * Populate the labels on the calendar. 
@@ -180,6 +256,81 @@ public class FXMLMainCalendarController implements Initializable {
     }
     
     /************************************** LOGIC **************************************/   
+     /**
+      * This method gets all the events of a day and return an ArrayList of Events
+      */
+   public ArrayList<Event> getEventArrayList (LocalDate givenDate) {
+        ArrayList <Event> eventsArrayList = new ArrayList<>(); 
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM EVENTS WHERE DATE = ? AND FK_USERNAME = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, givenDate.toString());
+            pstmt.setString(2, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            /* Create an ArrayList to store all the events. */ 
+            while (rs.next()) {
+                /* Get data from database of the user on a specific date  */
+                    //Dealing with date. 
+                Date tempDate = rs.getDate("date");
+                LocalDate date = tempDate.toLocalDate();
+                String dateString =  date.getYear() + "-" + date.getMonth().getValue() + "-" + date.getDayOfMonth();
+                    //Other data
+                String tempEventName = rs.getNString("event_name"); 
+                int tempStartTime = rs.getInt("start_time");
+                int tempEndTime = rs.getInt("end_time");
+                String tempUserName = rs.getNString("fk_username");
+                /* Create an object array to hold all the information */
+                Event event = new Event(dateString, tempEventName, 
+                    Integer.toString(tempStartTime), Integer.toString(tempEndTime), tempUserName); 
+                /* Add that event into the ArrayList */
+                eventsArrayList.add(event);
+            }
+            /* Close connection */
+            db.close_JDBC();
+        } catch (SQLException ex) {
+            System.out.println("selectOneDateButtonClicked Error: " + ex);
+        }
+        return eventsArrayList;
+   }
+    /**
+     * This method populate data into the signedInUser
+     */
+    public void fillInSignedInUserData() {
+        try {
+            /**
+             * Get user's data from the database
+             */ 
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT * FROM USERS WHERE USERNAME=?";
+            PreparedStatement pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                //initialize User variables
+                signedInUser.setFirstName(rs.getString("first_name"));
+                signedInUser.setLastName(rs.getString("last_name"));
+                signedInUser.setUsername(rs.getString("username"));
+                signedInUser.setPassword(rs.getString("password"));
+                signedInUser.setEmail(rs.getString("email"));
+                signedInUser.setPhone(rs.getString("phone"));
+                signedInUser.setPreference(rs.getString("preference"));
+                signedInUser.setReminderTime(rs.getString("remindertime"));
+                signedInUser.setProvider(rs.getString("provider"));
+            }
+            /* Close connection */
+             db.close_JDBC();
+        }
+        
+        catch (SQLException ex) {
+            System.out.println("initCurrentUser error: " + ex);
+        }
+    }
+
+
     //Set the calendar to DatePicker's date
     public void setCalToDatePicker() {
         //Use apptDatePicker.getValue().getmonnth and stuff to set the event to the calendar
@@ -242,6 +393,8 @@ public class FXMLMainCalendarController implements Initializable {
                 String eventName = rs.getString("event_name"); 
                 populateExistingEvents(monthValue, eventName);
             }
+             /* Close connection */
+             eventDB.close_JDBC();
         } 
             catch (SQLException ex) {
                 System.out.println("retrieveExistingEvents error: " + ex);
@@ -288,6 +441,9 @@ public class FXMLMainCalendarController implements Initializable {
             pstmt.setString(2, signedInUser.getUsername());
             pstmt.executeUpdate();
 
+            /* Close connection */
+             db.close_JDBC();
+             
             } catch (SQLException e) {
                 System.err.println(e.getMessage() + "--- setup calendar table");
             }
@@ -372,7 +528,10 @@ public class FXMLMainCalendarController implements Initializable {
                             confirmationAlert.showAndWait();
 
                             //Set the event into the calendar
-                            setCalToDatePicker();    
+                            setCalToDatePicker(); 
+                            
+                            /* Close connection */
+                            db.close_JDBC();
                         }
                         else {
                             Alert alert = new Alert(AlertType.WARNING);
@@ -381,6 +540,7 @@ public class FXMLMainCalendarController implements Initializable {
                         }
                     }
             }
+            
         }  catch (SQLException ex) {
             Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -473,9 +633,11 @@ public class FXMLMainCalendarController implements Initializable {
                     pstmt.executeUpdate();
                     /* Update signedInUser email */
                     signedInUser.setEmail(changeNameresult);
+                    
+                    /* Close connection */
+                    db.close_JDBC();
                 }
-                //If User click Cancel
-                //else {changeNameDialog.close();}
+                
             }
             // if there is no input
             else {
@@ -519,6 +681,9 @@ public class FXMLMainCalendarController implements Initializable {
                     
                     /* Update internal user */
                     signedInUser.setPassword(newPassword);
+                    
+                    /* Close connection */
+                    db.close_JDBC();
                 }
                 else {changePassDialog.close();}
             }
@@ -565,7 +730,11 @@ public class FXMLMainCalendarController implements Initializable {
                     /* Update internal user */
                     signedInUser.setFirstName(newFirst);
                 }
+                
                 else {changeFirstDialog.close();}
+                
+                /* Close connection */
+                db.close_JDBC();
             }
             //If there is no input
             else {
@@ -611,6 +780,8 @@ public class FXMLMainCalendarController implements Initializable {
                     signedInUser.setLastName(newLast);
                 }
                 else {changeLastDialog.close();}
+                /* Close connection */
+                db.close_JDBC();
             }
             //If there is no input
             else {
@@ -624,6 +795,84 @@ public class FXMLMainCalendarController implements Initializable {
         }
    }
     
+    /**
+     * This method changes password.
+     * @param event
+     */
+    public void changePhonePreferenceMenuItemPushed(ActionEvent event) {
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT PREFERENCE FROM USERS WHERE username = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            String userPref = ""; 
+            while (rs.next()) {
+                userPref = rs.getString("preference"); 
+            }
+            if (!"phone".equals(userPref)) {
+                query = "UPDATE USERS SET PREFERENCE = ? WHERE username = ?";
+                pstmt = db.conn.prepareStatement(query);
+                pstmt.setString(1, "phone");
+                pstmt.setString(2, signedInUser.getUsername());
+                pstmt.executeUpdate();
+                
+                /* Change preferences for internal user */
+                signedInUser.setPreference("phone");
+                
+                /* Notify user */
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setContentText("Successfully update preference.");
+                alert.showAndWait();
+            }
+            
+            /* Close connection */
+             db.close_JDBC();
+        } catch (SQLException ex) {
+            System.out.println("changePhonePreferenceMenuItemPushed error: " + ex);
+        }
+   }
+    
+    /**
+     * This method changes password.
+     * @param event
+     */
+    public void changeEmailPreferenceMenuItemPushed(ActionEvent event) {
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT PREFERENCE FROM USERS WHERE username = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            String userPref = ""; 
+            while (rs.next()) {
+                userPref = rs.getString("preference"); 
+            }
+            if (!"email".equals(userPref)) {
+                query = "UPDATE USERS SET PREFERENCE = ? WHERE username = ?";
+                pstmt = db.conn.prepareStatement(query);
+                pstmt.setString(1, "email");
+                pstmt.setString(2, signedInUser.getUsername());
+                pstmt.executeUpdate();
+                
+                /* Change preferences for internal user */
+                signedInUser.setPreference("email");
+                
+                /* Notify user */
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setContentText("Successfully update preference.");
+                alert.showAndWait();
+            }
+            /* Close connection */
+             db.close_JDBC();
+        } catch (SQLException ex) {
+            System.out.println("changePhonePreferenceMenuItemPushed error: " + ex);
+        }
+   }
     
     /**
      * This method moves the month back by one and 
@@ -714,6 +963,9 @@ public class FXMLMainCalendarController implements Initializable {
                 oneDayNameTableColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
                 oneDayStartTimeTableColumn.setCellValueFactory(new PropertyValueFactory<>("RealStartTime"));
                 oneDayEndTimeTableColumn.setCellValueFactory(new PropertyValueFactory<>("RealEndTime"));
+                
+                /* Close connection */
+                db.close_JDBC();
             } catch (SQLException ex) {
                 System.out.println("selectOneDateButtonClicked Error: " + ex);
             } 
@@ -751,6 +1003,9 @@ public class FXMLMainCalendarController implements Initializable {
 
                 /* Update the tableview */
                 selectOneDateButtonClicked ();
+                
+                /* Close connection */
+                db.close_JDBC();
             } catch (SQLException ex) {
                 System.err.println("removeButtonPushed: " + ex);
             }
@@ -781,7 +1036,7 @@ public class FXMLMainCalendarController implements Initializable {
 
 
             //Call function in Main Calendar Controller
-            iaController.initializeScene(signedInUser.getUsername());
+            iaController.initializeScene(signedInUser.getUsername(), signedInUser.getPassword());
 
             //This line gets stage informaion
             Stage window = new Stage(); 
@@ -820,6 +1075,16 @@ public class FXMLMainCalendarController implements Initializable {
         } catch (IOException ex) {
             System.out.println("changeEventButton: " + ex);
         }
+    }
+    
+    /**
+     * This method is to open colorpicker scene.
+     * @param event
+     */
+    public void colorPickerPushed(ActionEvent event) {
+        Color chosen = colorPicker.getValue();
+        
+        mainPane.setBackground(new Background(new BackgroundFill(chosen, CornerRadii.EMPTY, Insets.EMPTY)));
     }
     
     /************************************** INITIALIZATION **************************************/

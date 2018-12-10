@@ -19,12 +19,15 @@ public class FXMLAccountDetailController implements Initializable {
     @FXML private Label passwordTitleLabel; 
     @FXML private Label emailTitleLabel; 
     @FXML private Label phoneTitleLabel;
+    @FXML private Label reminderTitleLabel;
     @FXML private Label userFirstNameLabel; 
     @FXML private Label userLastNameLabel; 
     @FXML private Label userUsernameNameLabel; 
     @FXML private Label userPasswordNameLabel; 
     @FXML private Label userEmailNameLabel; 
-    @FXML private Label userPhoneLabel; 
+    @FXML private Label userPhoneLabel;
+    @FXML private Label userPreferenceLabel;
+    @FXML private Label userReminderLabel;
     
     private User signedInUser;
     
@@ -47,12 +50,17 @@ public class FXMLAccountDetailController implements Initializable {
         userPasswordNameLabel.setVisible(true);
         userEmailNameLabel.setVisible(true);
         userPhoneLabel.setVisible(true);
+        userPreferenceLabel.setVisible(true);
+        userReminderLabel.setVisible(true);
         userFirstNameLabel.setText(signedInUser.getFirstName().toUpperCase());
         userLastNameLabel.setText(signedInUser.getLastName().toUpperCase(Locale.ITALY));
         userUsernameNameLabel.setText(signedInUser.getUsername());
         userPasswordNameLabel.setText(signedInUser.getPassword());
         userEmailNameLabel.setText(signedInUser.getEmail());
         userPhoneLabel.setText(signedInUser.getPhone());
+         System.out.println(signedInUser.getPreference());
+        userPreferenceLabel.setText(signedInUser.getPreference());
+        userReminderLabel.setText(signedInUser.getReminderTime() + " mins");
     }
     
     /**
@@ -77,7 +85,12 @@ public class FXMLAccountDetailController implements Initializable {
                 signedInUser.setPassword(rs.getString("password"));
                 signedInUser.setEmail(rs.getString("email"));
                 signedInUser.setPhone(rs.getString("phone"));
+                signedInUser.setPreference(rs.getString("preference"));
+                signedInUser.setReminderTime(rs.getString("remindertime"));
+                signedInUser.setProvider(rs.getString("provider"));
             }
+            /* Close connection */
+             db.close_JDBC();
         }
         catch (SQLException ex) {
             System.out.println("initCurrentUser error: " + ex);

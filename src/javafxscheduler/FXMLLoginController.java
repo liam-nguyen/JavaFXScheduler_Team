@@ -82,15 +82,15 @@ public class FXMLLoginController implements Initializable {
             /*
             * Verify username and password  
             */
-            DatabaseHandler userDB = new DatabaseHandler();
+            DatabaseHandler db = new DatabaseHandler();
             boolean verified = false; 
 
             try {
-                userDB.connect_CALENDAR();
+                db.connect_CALENDAR();
                 if (usernameAttempt != null && passwordAttempt != null) {
                     String query = "SELECT * FROM USERS WHERE USERNAME=? AND PASSWORD= ?";
                     PreparedStatement pstmt;
-                    pstmt = userDB.conn.prepareStatement(query); 
+                    pstmt = db.conn.prepareStatement(query); 
                     pstmt.setString(1, usernameAttempt);
                     pstmt.setString(2, passwordAttempt);
                     ResultSet rs = pstmt.executeQuery(); 
@@ -134,9 +134,14 @@ public class FXMLLoginController implements Initializable {
                         errorAlert.setContentText("Please login with different username or password.");
                         errorAlert.showAndWait();
                     } 
+                
                 } catch (IOException ex) {
                     System.out.println("User verified error: " + ex);
+                
                 }
+            
+            /* Close connection */
+             db.close_JDBC();
         }
     }
     

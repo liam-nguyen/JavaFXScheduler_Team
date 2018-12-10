@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -16,7 +17,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="894.0" prefWidth="1178.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLMainCalendarController">
+<AnchorPane id="AnchorPane" fx:id="mainPane" prefHeight="894.0" prefWidth="1178.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLMainCalendarController">
    <children>
       <MenuBar fx:id="menuBar" layoutX="7.0" layoutY="7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
@@ -38,8 +39,8 @@
           </Menu>
           <Menu fx:id="settingMenu" mnemonicParsing="false" text="Setting">
             <items>
-              <MenuItem fx:id="setCalenarRangeMenuItem" mnemonicParsing="false" text="Set Calendar Range" />
-                  <MenuItem fx:id="setCalendarColorMenuItem" mnemonicParsing="false" text="Set Calendar Color" />
+                  <MenuItem fx:id="changeToPhoneMenuItem" mnemonicParsing="false" onAction="#changePhonePreferenceMenuItemPushed" text="Phone Reminder" />
+                  <MenuItem fx:id="changeToEmailMenuItem" mnemonicParsing="false" onAction="#changeEmailPreferenceMenuItemPushed" text="Email Reminder" />
             </items>
           </Menu>
             <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
@@ -415,19 +416,19 @@
       </GridPane>
       <AnchorPane prefHeight="53.0" prefWidth="978.0" AnchorPane.bottomAnchor="813.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
-            <Button fx:id="previousMonthButton" alignment="CENTER" layoutY="21.0" mnemonicParsing="false" onAction="#previousMonthButtonPushed" prefHeight="27.0" prefWidth="120.0" text="Previous Month" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="21.0" />
-            <Button fx:id="nextMonthButton" layoutX="666.0" layoutY="21.0" mnemonicParsing="false" onAction="#nextMonthButtonPushed" prefHeight="27.0" prefWidth="120.0" text="Next Month" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="21.0" />
-            <Label fx:id="currentMonthLabel" layoutX="407.0" layoutY="22.0" text="CURRENT MONTH">
+            <Button fx:id="previousMonthButton" alignment="CENTER" layoutY="13.0" mnemonicParsing="false" onAction="#previousMonthButtonPushed" prefHeight="27.0" prefWidth="120.0" text="Previous Month" textFill="#212121" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="13.0" />
+            <Button fx:id="nextMonthButton" layoutX="844.0" layoutY="13.0" mnemonicParsing="false" onAction="#nextMonthButtonPushed" prefHeight="27.0" prefWidth="120.0" text="Next Month" textFill="#212121" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="13.0" />
+            <Label fx:id="currentMonthLabel" layoutX="401.0" layoutY="13.0" text="CURRENT MONTH" textFill="#a12626">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <Button fx:id="todayButton" layoutX="763.0" layoutY="22.0" mnemonicParsing="false" onAction="#todayButtonPushed" text="Today" />
+            <Button fx:id="todayButton" layoutX="763.0" layoutY="13.0" mnemonicParsing="false" onAction="#todayButtonPushed" text="Today" textFill="#212121" />
          </children>
       </AnchorPane>
       <AnchorPane layoutY="30.0" prefHeight="864.0" prefWidth="199.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="979.0" AnchorPane.topAnchor="30.0">
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="11.0" layoutY="474.0" prefHeight="39.0" prefWidth="169.0" text="Appointment" AnchorPane.bottomAnchor="351.0" AnchorPane.leftAnchor="11.0" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="474.0">
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="11.0" layoutY="467.0" prefHeight="39.0" prefWidth="169.0" text="Add Event" textFill="#1b3779" AnchorPane.bottomAnchor="358.0" AnchorPane.leftAnchor="11.0" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="467.0">
                <font>
                   <Font size="20.0" />
                </font>
@@ -438,7 +439,7 @@
             <TextField fx:id="apptNameTextField" layoutX="10.0" layoutY="620.0" prefHeight="39.0" prefWidth="179.0" AnchorPane.bottomAnchor="205.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="620.0" />
             <Label layoutX="11.0" layoutY="659.0" prefHeight="29.0" prefWidth="142.0" text="Start Time" AnchorPane.bottomAnchor="176.0" AnchorPane.leftAnchor="11.0" AnchorPane.rightAnchor="46.0" AnchorPane.topAnchor="659.0" />
             <Label layoutX="10.0" layoutY="731.0" prefHeight="32.0" prefWidth="141.0" text="End Time" AnchorPane.bottomAnchor="101.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="48.0" AnchorPane.topAnchor="731.0" />
-            <Button fx:id="saveApptButton" layoutX="24.0" layoutY="812.0" mnemonicParsing="false" onAction="#saveAppointmentButtonPushed" text="Save Appointment" />
+            <Button fx:id="saveApptButton" layoutX="24.0" layoutY="812.0" mnemonicParsing="false" onAction="#saveAppointmentButtonPushed" text="Save Appointment" textFill="#212121" />
             <ComboBox fx:id="startTimeHourComboBox" layoutX="10.0" layoutY="688.0" prefHeight="27.0" prefWidth="85.0" AnchorPane.leftAnchor="10.0" />
             <ComboBox fx:id="startTimeMinComboBox" layoutX="115.0" layoutY="688.0" prefHeight="27.0" prefWidth="70.0" AnchorPane.rightAnchor="14.0" />
             <ComboBox fx:id="endTimeHourComboBox" layoutX="10.0" layoutY="763.0" prefHeight="27.0" prefWidth="85.0" AnchorPane.leftAnchor="10.0" />
@@ -447,20 +448,20 @@
                <children>
                   <TableView fx:id="oneDayTableView" layoutY="158.0" prefHeight="226.0" prefWidth="199.0" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="158.0">
                     <columns>
-                        <TableColumn fx:id="oneDayNameTableColumn" prefWidth="75.0" text="Name" />
-                        <TableColumn fx:id="oneDayStartTimeTableColumn" prefWidth="60.0" text="Start Time" />
-                        <TableColumn fx:id="oneDayEndTimeTableColumn" prefWidth="60.0" text="End Time" />
+                        <TableColumn fx:id="oneDayNameTableColumn" prefWidth="75.0" style="-fx-backgound-color: #BDBDBD#BDBDBD #BDBDBD#BDBDBD;" text="Name" />
+                        <TableColumn fx:id="oneDayStartTimeTableColumn" prefWidth="60.0" style="-fx-backgound-color: #BDBDBD#BDBDBD #BDBDBD#BDBDBD;" text="Start Time" />
+                        <TableColumn fx:id="oneDayEndTimeTableColumn" prefWidth="60.0" style="-fx-backgound-color: #BDBDBD#BDBDBD #BDBDBD#BDBDBD;" text="End Time" />
                     </columns>
                   </TableView>
                   <DatePicker fx:id="oneDateApptDatePicker" layoutX="6.0" layoutY="74.0" prefHeight="39.0" prefWidth="179.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" />
-                  <Label layoutX="18.0" layoutY="24.0" text="CHOOSE A DATE TO VIEW" />
-                  <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" AnchorPane.rightAnchor="6.5" />
-                  <Button fx:id="removeEventButton" layoutX="134.0" layoutY="386.0" mnemonicParsing="false" onAction="#removeButtonPushed" text="Remove" AnchorPane.rightAnchor="6.0" />
-                  <Button fx:id="changeEventButton" layoutY="386.0" mnemonicParsing="false" onAction="#changeEventButton" text="Change" />
+                  <Label layoutX="18.0" layoutY="44.0" text="CHOOSE A DATE TO VIEW" textFill="#1b3779" />
+                  <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" textFill="#212121" AnchorPane.rightAnchor="6.5" />
+                  <Button fx:id="removeEventButton" layoutX="134.0" layoutY="386.0" mnemonicParsing="false" onAction="#removeButtonPushed" text="Remove" textFill="#212121" AnchorPane.rightAnchor="6.0" />
+                  <Button fx:id="changeEventButton" layoutY="386.0" mnemonicParsing="false" onAction="#changeEventButton" text="Change" textFill="#212121" />
+                  <ColorPicker fx:id="colorPicker" layoutX="30.0" layoutY="1.0" onAction="#colorPickerPushed" />
                </children>
             </AnchorPane>
          </children>
       </AnchorPane>
-      <Label fx:id="currentUsernameInfo" text="currentUsernameInfo" AnchorPane.leftAnchor="650.0" AnchorPane.topAnchor="7.0" />
    </children>
 </AnchorPane>

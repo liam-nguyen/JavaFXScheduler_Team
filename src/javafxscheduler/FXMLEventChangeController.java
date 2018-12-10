@@ -10,13 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
@@ -79,6 +76,8 @@ public class FXMLEventChangeController implements Initializable {
             /* Update Label */
             EventNameLabel.setText(newName);
             
+            /* Close connection */
+             db.close_JDBC();
         } catch (SQLException ex) {
             System.out.println("changeNameButton fail: + " + ex);
         }
@@ -129,8 +128,11 @@ public class FXMLEventChangeController implements Initializable {
                 statusLabel.setText("Date Changed Sucessfully.");
 
                 /* Update Label */
-                EventNameLabel.setText(newDate);
+                EventDateLabel.setText(newDate);
 
+                /* Close connection */
+             db.close_JDBC();
+             
                 } catch (SQLException ex) {
                     System.out.println("dateChangeButton fail: + " + ex);
                 }
@@ -192,9 +194,9 @@ public class FXMLEventChangeController implements Initializable {
             pstmt = db.conn.prepareStatement(query);
             pstmt.setString(2, currentEvent.getEventName());
             pstmt.setString(1, currentEvent.getEventDate());
-            pstmt.setString(4, newStartTimeInMinute);
-            pstmt.setString(5, currentEvent.getEndTime());
-            pstmt.setString(6, currentEvent.getFkUserName());
+            pstmt.setString(3, newStartTimeInMinute);
+            pstmt.setString(4, currentEvent.getEndTime());
+            pstmt.setString(5, currentEvent.getFkUserName());
             pstmt.executeUpdate();
 
             /* Update internal event */
@@ -206,6 +208,8 @@ public class FXMLEventChangeController implements Initializable {
             /* Update Label */
             EventStartTimeLabel.setText(newStartTime);
         }
+        /* Close connection */
+         db.close_JDBC();
         } catch (SQLException ex) {
                 System.out.println("startTimeChangeButton fail: + " + ex);
         }
@@ -280,6 +284,8 @@ public class FXMLEventChangeController implements Initializable {
             /* Update Label */
             EventEndTimeLabel.setText(newEndTime);
         }
+        /* Close connection */
+         db.close_JDBC();
         } catch (SQLException ex) {
                 System.out.println("endTimeChangeButton fail: + " + ex);
         }

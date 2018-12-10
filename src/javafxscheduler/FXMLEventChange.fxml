@@ -8,9 +8,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLEventChangeController">
+<AnchorPane id="AnchorPane" prefHeight="300.0" prefWidth="600.0" style="-fx-background-color: #B2DFDB#B2DFDB;" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxscheduler.FXMLEventChangeController">
    <children>
-      <Label layoutX="7.0" layoutY="6.0" text="Event Details">
+      <Label layoutX="7.0" layoutY="6.0" text="Event Details" textFill="#1b3779">
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
@@ -50,11 +50,11 @@
             </Label>
          </children>
       </AnchorPane>
-      <Button fx:id="EventNameButton" layoutX="51.0" layoutY="204.0" mnemonicParsing="false" onAction="#changeNameButton" text="Change" />
-      <Button fx:id="EventDateButton" layoutX="200.0" layoutY="204.0" mnemonicParsing="false" onAction="#dateChangeButton" text="Change" />
-      <Button fx:id="EventStartTimeButton" layoutX="339.0" layoutY="204.0" mnemonicParsing="false" onAction="#startTimeChangeButton" text="Change" />
-      <Button fx:id="EventEndTimeButton" layoutX="486.0" layoutY="204.0" mnemonicParsing="false" onAction="#endTimeChangeButton" text="Change" />
-      <Label fx:id="statusLabel" layoutX="449.0" layoutY="256.0" text="Status" AnchorPane.bottomAnchor="27.0" AnchorPane.rightAnchor="13.5" AnchorPane.topAnchor="256.0">
+      <Button fx:id="EventNameButton" layoutX="51.0" layoutY="204.0" mnemonicParsing="false" onAction="#changeNameButton" style="-fx-background-color: #009688#009688;" text="Change" />
+      <Button fx:id="EventDateButton" layoutX="200.0" layoutY="204.0" mnemonicParsing="false" onAction="#dateChangeButton" style="-fx-background-color: #009688#009688;" text="Change" />
+      <Button fx:id="EventStartTimeButton" layoutX="339.0" layoutY="204.0" mnemonicParsing="false" onAction="#startTimeChangeButton" style="-fx-background-color: #009688#009688;" text="Change" />
+      <Button fx:id="EventEndTimeButton" layoutX="486.0" layoutY="204.0" mnemonicParsing="false" onAction="#endTimeChangeButton" style="-fx-background-color: #009688#009688;" text="Change" />
+      <Label fx:id="statusLabel" layoutX="449.0" layoutY="256.0" text="Status" textFill="#1b3779" AnchorPane.bottomAnchor="27.0" AnchorPane.rightAnchor="13.5" AnchorPane.topAnchor="256.0">
          <padding>
             <Insets left="50.0" right="50.0" />
          </padding>

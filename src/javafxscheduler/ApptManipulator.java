@@ -9,8 +9,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,8 +16,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.Row;
 
 
@@ -31,8 +27,7 @@ public class ApptManipulator {
     
     /*********** Constructor, Getters and Setters ***********
     /* Constructor
-     * @param user
-     * @param coll 
+     * @param user 
      */
     public ApptManipulator (String user) {
         currentUser = user; 
@@ -107,6 +102,8 @@ public class ApptManipulator {
                 /* Add that object array into the ArrayList */
                 eventsArrayList.add(tempEvent);
             }
+            /* Close connection */
+             db.close_JDBC();
         }   catch (SQLException ex) {
             System.out.println("allEventsOfUser error: " + ex);
         }

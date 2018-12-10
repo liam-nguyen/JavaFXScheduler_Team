@@ -6,12 +6,8 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -38,7 +34,6 @@ public class FXMLImportAppointmentsController implements Initializable {
     @FXML private TableView<Event> existingApptTableView; 
     @FXML private TableView<Event> newApptTableView; 
     @FXML private Button importButton; 
-    @FXML private Label statusLabel; 
     @FXML private Button populateUserEventButton; 
     @FXML private Button importFileButton; 
     @FXML private Button mergeEventButton; 
@@ -57,15 +52,13 @@ public class FXMLImportAppointmentsController implements Initializable {
     private ArrayList<Event> otherEventsArrayList;
     
     
-   
-    
     
     /************************************** LOGIC **************************************/
     /**
      * This method passes username from previous scene to this scene. 
      */
-    public void initializeScene (String username) {
-        signedInUser.setUsername(username);
+    public void initializeScene (String u, String p) {
+        signedInUser = new User(u, p); 
     }
     
         
@@ -185,12 +178,12 @@ public class FXMLImportAppointmentsController implements Initializable {
             
             /* Refresh the tableview of other user's tableview */
             populateOtherUserTableView(); 
-            
-            /* Set Label text */
-            statusLabel.setText("SUCCESS");
+
         } 
         else {
-            statusLabel.setText("CONFLICTED WITH CURRENT EVENTS....");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("CONFLICTED WITH YOUR CURRENT EVENTS");
+            alert.showAndWait();
         }
     } 
     
