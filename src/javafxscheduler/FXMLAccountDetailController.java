@@ -58,7 +58,6 @@ public class FXMLAccountDetailController implements Initializable {
         userPasswordNameLabel.setText(signedInUser.getPassword());
         userEmailNameLabel.setText(signedInUser.getEmail());
         userPhoneLabel.setText(signedInUser.getPhone());
-         System.out.println(signedInUser.getPreference());
         userPreferenceLabel.setText(signedInUser.getPreference());
         userReminderLabel.setText(signedInUser.getReminderTime() + " mins");
     }

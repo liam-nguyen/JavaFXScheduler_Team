@@ -139,7 +139,7 @@ public class FXMLMainCalendarController implements Initializable {
      */
     public void initializeMainCalendar (String u, String p) 
     {
-        //Initialize data.
+        /*Initialize data */
         signedInUser = new User (u, p);
         
         //Filled in user's data
@@ -159,15 +159,14 @@ public class FXMLMainCalendarController implements Initializable {
         {
             intList[i] = formatter.format(i); 
         } 
-        
         startTimeHourComboBox.getItems().addAll(hourList);
         startTimeMinComboBox.getItems().addAll(intList);
         endTimeHourComboBox.getItems().addAll(hourList);
         endTimeMinComboBox.getItems().addAll(intList);
         
-        /** Create a thread to send email to user */ 
-
-            
+        
+        
+        /** Create a thread to send email to user */  
         // Run in a second
         final long INTERVAL = 60000; //Every 1 minutes 
         
@@ -182,34 +181,27 @@ public class FXMLMainCalendarController implements Initializable {
         Runnable runnable = new Runnable() {
             public void run() {
                 while(true) {
-                    System.out.println("Wake up");
                     /* Get array of events for today */
                     LocalDate now = LocalDate.now();
                     ArrayList <Event> eventsArrayList = getEventArrayList(now); 
                     for (int i = 0; i < eventsArrayList.size(); i++) {
-                        System.out.println("Loop #: " + i);
                         Event ev = eventsArrayList.get(i);
                         /* Start time - ReminderTime */
                         int rewindTime = Integer.parseInt(ev.getStartTime()) - Integer.parseInt(signedInUser.getReminderTime());
-                        System.out.println("difference " + rewindTime);
                         Calendar rightNow = Calendar.getInstance();
                         int hour = rightNow.get(Calendar.HOUR_OF_DAY);
                         int min = rightNow.get(Calendar.MINUTE); 
                         int currentMins = hour * 60 + min; 
-                        System.out.println("currentMins " + currentMins);
                         /* Only send reminder if the event hasn't occured yet. */
-                        System.out.println("ev.getStartTime(): " + ev.getStartTime());
                         if (currentMins > rewindTime && currentMins < Integer.parseInt(ev.getStartTime())) {
-                            System.out.println("About to send ");
                              /* Send email to that email address */
                              String message = "Reminder. You have an appointment. Here is the detail: \n" + ev.getEventName() + " - " + ev.getRealStartTime() + " - " + ev.getRealEndTime();
                              sendEmail.send(message); 
-                             System.out.println("Sent Email ");
+                             System.out.println("Reminder Sent....");
                         }
                     }
  
                 try {
-                    System.out.println("Sleep");
                     Thread.sleep(INTERVAL);
                 }  catch (InterruptedException e) {	
                      e.printStackTrace();
@@ -221,7 +213,6 @@ public class FXMLMainCalendarController implements Initializable {
         Thread thread = new Thread(runnable); 
         thread.setDaemon(true);
         thread.start(); 
-        
     }
     
     
@@ -309,6 +300,7 @@ public class FXMLMainCalendarController implements Initializable {
             PreparedStatement pstmt = db.conn.prepareStatement(query);
             pstmt.setString(1, signedInUser.getUsername());
             ResultSet rs = pstmt.executeQuery();
+            String calendarColor = "";
             while (rs.next()) {
                 //initialize User variables
                 signedInUser.setFirstName(rs.getString("first_name"));
@@ -320,9 +312,14 @@ public class FXMLMainCalendarController implements Initializable {
                 signedInUser.setPreference(rs.getString("preference"));
                 signedInUser.setReminderTime(rs.getString("remindertime"));
                 signedInUser.setProvider(rs.getString("provider"));
+                calendarColor = rs.getString("calendar_color"); 
             }
             /* Close connection */
              db.close_JDBC();
+             
+             /* Apply color to the calendar */
+             Color chosen = Color.web(calendarColor); 
+             mainPane.setBackground(new Background(new BackgroundFill(chosen, CornerRadii.EMPTY, Insets.EMPTY)));
         }
         
         catch (SQLException ex) {
@@ -1082,9 +1079,26 @@ public class FXMLMainCalendarController implements Initializable {
      * @param event
      */
     public void colorPickerPushed(ActionEvent event) {
-        Color chosen = colorPicker.getValue();
-        
-        mainPane.setBackground(new Background(new BackgroundFill(chosen, CornerRadii.EMPTY, Insets.EMPTY)));
+        try {
+            Color chosen = colorPicker.getValue();
+            /**
+             * Save user's Color into database.
+             */
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "UPDATE USERS SET CALENDAR_COLOR = ? WHERE USERNAME=?";
+            PreparedStatement pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(2, signedInUser.getUsername());
+            pstmt.setString(1, chosen.toString());
+            pstmt.executeUpdate();
+            /* Close connection */
+            db.close_JDBC();
+            
+            /* Set the color for the Calendar */
+            mainPane.setBackground(new Background(new BackgroundFill(chosen, CornerRadii.EMPTY, Insets.EMPTY)));
+        } catch (SQLException ex) {
+            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     /************************************** INITIALIZATION **************************************/

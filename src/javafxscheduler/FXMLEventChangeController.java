@@ -246,7 +246,9 @@ public class FXMLEventChangeController implements Initializable {
         /* Check if the new date is conflicted with any other events on that new date*/
         boolean conflicted = Event.apptConflict(currentEvent.getFkUserName(), eLocalDate, 
                 Integer.parseInt(currentEvent.getStartTime()), Integer.parseInt(newEndTimeInMinute));
-
+        /* Check if the new user's End Time is before the Event's start Time. */
+        boolean validEndTime = Event.validTime(Integer.parseInt(currentEvent.getStartTime()), Integer.parseInt(newEndTimeInMinute)); 
+        
         /* If so, error popup */
         if (conflicted == true) {
             /* Put back the value */
@@ -264,6 +266,24 @@ public class FXMLEventChangeController implements Initializable {
             alert.setContentText("Conflicted with Existing Events");
             alert.showAndWait();
         }
+        
+        else if (validEndTime == false) {
+            /* Put back the value */
+            query = "INSERT INTO EVENTS VALUES (?, ?, ?, ?, ?)";
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, currentEvent.getEventDate());
+            pstmt.setString(2, currentEvent.getEventName());
+            pstmt.setString(3, currentEvent.getStartTime());
+            pstmt.setString(4, currentEvent.getEndTime());
+            pstmt.setString(5, currentEvent.getFkUserName());
+            pstmt.executeUpdate();
+
+            /* Alert user */
+            Alert alert = new Alert(Alert.AlertType.ERROR); 
+            alert.setContentText("New End Time is Before Start Time");
+            alert.showAndWait();
+        }
+        
         /* Change the database */
         else {
             query = "INSERT INTO EVENTS VALUES (?, ?, ?, ?, ?)"; 

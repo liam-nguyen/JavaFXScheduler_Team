@@ -14,7 +14,6 @@ public class DatabaseHandler {
             Class.forName("com.mysql.jdbc.Driver");
             // Open a connection
             conn = DriverManager.getConnection("jdbc:mysql://localhost/CALENDAR?useSSL=false", this.username, this.pass);
-            System.out.println("Sucessfully connected to Calendar");
         } catch (ClassNotFoundException | SQLException ex) {
             System.out.println("connect_Calendar() error: " + ex);
         }
@@ -24,7 +23,6 @@ public class DatabaseHandler {
     public void close_JDBC() {
         try {
             conn.close();
-            System.out.println("Close JDBC");
         } catch (SQLException ex) {
             System.out.println("close_JDBC() error: " + ex);
         }
@@ -57,7 +55,8 @@ public class DatabaseHandler {
                     "phone varchar(32), " + 
                     "preference varchar(32) not NULL, " + 
                     "reminderTime varchar(32), " + 
-                    "provider varchar(32))"; 
+                    "provider varchar(32), " + 
+                    "calendar_color varchar(32))"; 
             stmt.execute(query);
             
             //Create table CALENDAR

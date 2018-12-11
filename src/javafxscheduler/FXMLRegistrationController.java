@@ -160,8 +160,8 @@ public class FXMLRegistrationController implements Initializable {
                     /**
                      * If user is not in the database, save user's data into database Calendar
                      */ 
-                    query = "INSERT INTO USERS (first_name, last_name, username, password, email, phone, preference, reminderTime) "
-                            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    query = "INSERT INTO USERS (first_name, last_name, username, password, email, phone, preference, reminderTime, provider, calendar_color) "
+                            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstmt = db.conn.prepareStatement(query);
                     pstmt.setString(1, firstNameTextField.getText());
                     pstmt.setString(2, lastNameTextField.getText());
@@ -171,6 +171,8 @@ public class FXMLRegistrationController implements Initializable {
                     pstmt.setString(6, phoneTextField.getText());
                     pstmt.setString(7, "email");
                     pstmt.setString(8, "30");
+                    pstmt.setString(9, "NULL");
+                    pstmt.setString(10, "#ffffff");
                     pstmt.executeUpdate();
                     
                     //Notify user about successful registration
