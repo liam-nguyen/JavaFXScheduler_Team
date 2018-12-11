@@ -27,6 +27,7 @@
               <MenuItem fx:id="changePasswordMenuItem" mnemonicParsing="false" onAction="#changePasswordMenuItemPushed" text="Change Password" />
                   <MenuItem fx:id="changeFirstMenuItem" mnemonicParsing="false" onAction="#changeFirstNameMenuItemPushed" text="Change First Name" />
                   <MenuItem fx:id="changeLastMenuItem" mnemonicParsing="false" onAction="#changeLastNameMenuItemPushed" text="Change Last Name" />
+                  <MenuItem fx:id="changeReminderTimeMenuItem" mnemonicParsing="false" onAction="#changeReminderTimeMenuItemPushed" text="Change Reminder Time" />
                   <MenuItem fx:id="accountDetailMenuItem" mnemonicParsing="false" onAction="#accountDetailMenuItemPushed" text="Account Detail" />
                   <MenuItem fx:id="logoutMenuItem" mnemonicParsing="false" onAction="#logOutMenuItemPushed" text="Log Out" />
             </items>
@@ -41,6 +42,7 @@
             <items>
                   <MenuItem fx:id="changeToPhoneMenuItem" mnemonicParsing="false" onAction="#changePhonePreferenceMenuItemPushed" text="Phone Reminder" />
                   <MenuItem fx:id="changeToEmailMenuItem" mnemonicParsing="false" onAction="#changeEmailPreferenceMenuItemPushed" text="Email Reminder" />
+                  <MenuItem fx:id="changeEmailFrequencyMenuItem" mnemonicParsing="false" onAction="#changeEmailFrequencyMenuItemPushed" text="Change Email Frequency" />
             </items>
           </Menu>
             <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
@@ -458,7 +460,7 @@
                   <Button fx:id="selectOneDateButton" layoutX="136.0" layoutY="113.0" mnemonicParsing="false" onAction="#selectOneDateButtonClicked" text="Select" textFill="#212121" AnchorPane.rightAnchor="6.5" />
                   <Button fx:id="removeEventButton" layoutX="134.0" layoutY="386.0" mnemonicParsing="false" onAction="#removeButtonPushed" text="Remove" textFill="#212121" AnchorPane.rightAnchor="6.0" />
                   <Button fx:id="changeEventButton" layoutY="386.0" mnemonicParsing="false" onAction="#changeEventButton" text="Change" textFill="#212121" />
-                  <ColorPicker fx:id="colorPicker" layoutX="30.0" layoutY="1.0" onAction="#colorPickerPushed" />
+                  <ColorPicker fx:id="colorPicker" layoutX="30.0" layoutY="1.0" onAction="#colorPickerPushed" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
          </children>

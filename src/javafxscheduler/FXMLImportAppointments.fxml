@@ -13,11 +13,11 @@
          <children>
             <TableView fx:id="existingApptTableView" layoutY="17.0" prefHeight="461.0" prefWidth="408.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="17.0">
                <columns>
-                  <TableColumn fx:id="eDateColumn" editable="false" prefWidth="90.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Date" />
-                  <TableColumn fx:id="eNameColumn" editable="false" prefWidth="90.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Name" />
-                  <TableColumn fx:id="eStartTimeColumn" editable="false" prefWidth="75.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Start Time" />
-                  <TableColumn fx:id="eEndTimeColumn" editable="false" prefWidth="75.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="End Time" />
-                  <TableColumn fx:id="eUsernameColumn" editable="false" prefWidth="70.0" resizable="false" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Username" />
+                  <TableColumn fx:id="eDateColumn" editable="false" prefWidth="90.0" text="Date" />
+                  <TableColumn fx:id="eNameColumn" editable="false" prefWidth="90.0" text="Name" />
+                  <TableColumn fx:id="eStartTimeColumn" editable="false" prefWidth="75.0" text="Start Time" />
+                  <TableColumn fx:id="eEndTimeColumn" editable="false" prefWidth="75.0" text="End Time" />
+                  <TableColumn fx:id="eUsernameColumn" editable="false" prefWidth="70.0" resizable="false" text="Username" />
                </columns></TableView>
          </children>
       </AnchorPane>
@@ -25,11 +25,11 @@
          <children>
             <TableView fx:id="newApptTableView" layoutX="7.0" layoutY="76.0" prefHeight="461.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                <columns>
-                  <TableColumn fx:id="nDateColumn" prefWidth="90.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Date" />
-                  <TableColumn fx:id="nNameColumn" prefWidth="90.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Name" />
-                  <TableColumn fx:id="nStartTimeColumn" prefWidth="75.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Start Time" />
-                  <TableColumn fx:id="nEndTimeColumn" prefWidth="75.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="End Time" />
-                  <TableColumn fx:id="nUsernameColumn" prefWidth="70.0" style="-fx-background-color: #B2DFDB#B2DFDB;" text="Username" />
+                  <TableColumn fx:id="nDateColumn" prefWidth="90.0" text="Date" />
+                  <TableColumn fx:id="nNameColumn" prefWidth="90.0" text="Name" />
+                  <TableColumn fx:id="nStartTimeColumn" prefWidth="75.0" text="Start Time" />
+                  <TableColumn fx:id="nEndTimeColumn" prefWidth="75.0" text="End Time" />
+                  <TableColumn fx:id="nUsernameColumn" prefWidth="70.0" text="Username" />
                </columns></TableView>
          </children>
       </AnchorPane>

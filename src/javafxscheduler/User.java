@@ -1,3 +1,7 @@
+/****
+ * This class is a blueprint of a user and information required in other scenes. 
+ */
+
 package javafxscheduler;
 
 import java.sql.PreparedStatement;
@@ -7,17 +11,15 @@ import javafx.scene.paint.Color;
 
 
 public class User {
-    private String firstName, lastName, email;
-    private String username, password, phone;
-    private String preference;
+    private String firstName, lastName, email, username, password, phone, provider, preference;
     private String reminderTime = "30";
-    private String provider;
     private Color calendarColor; 
-
     
-//Connecting to database
+    /* Handle database connection */
     private DatabaseHandler userDB = new DatabaseHandler();
-   /** Constructor */
+   
+    
+   /** Constructor **/
     public User (String f, String l, String e, String u, String p) {
         firstName = f; 
         lastName = l; 
@@ -27,13 +29,12 @@ public class User {
         preference = "email"; 
     }
 
-    
     public User (String u, String p) {
         username = u; 
         password = p;
     }
     
-    /* Getters & Setters */
+    /** Getters & Setters **/
     public String getFirstName() {
         return firstName;
     }
@@ -114,9 +115,11 @@ public class User {
         this.calendarColor = calendarColor;
     }
     
-    
-    /** Other methods
-     * @return  */
+    /********************************** METHODS **********************************/
+    /**
+     * This method verifyAccount when user tries to log in. 
+     * @return true if user is in the database, false if user is not in the database.  
+     */
     public boolean verifyAccount() {
         try {
             userDB.connect_CALENDAR();

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package javafxscheduler;
 import java.sql.SQLException;
 import javafx.application.Application;
@@ -12,8 +7,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- *
- * @author chinhnguyen
+ * CALENDAR PROJECT - CECS 343. 
+ * @author Liam Nguyen and Meng Cha.
  */
 
 public class JavaFxScheduler extends Application {

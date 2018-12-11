@@ -69,10 +69,8 @@ public class FXMLImportAppointmentsController implements Initializable {
         ApptManipulator apptManipulator = new ApptManipulator(signedInUser.getUsername()); 
         userEventsArrayList = apptManipulator.allEventsOfUser();
         ObservableList<Event> obsEventsArr = FXCollections.observableArrayList(userEventsArrayList); //Tableview uses observableArrayList
-        System.out.println("Check List");
         for (int i = 0; i < obsEventsArr.size(); i++) {
              Event tempt = obsEventsArr.get(i); 
-             System.out.println(tempt.getEventDate()+ " " + tempt.getEventName() + " " + tempt.getRealStartTime()+ " " + tempt.getRealEndTime()+ " " + tempt.getFkUserName());
         }
         existingApptTableView.setItems(obsEventsArr);
         eDateColumn.setCellValueFactory(new PropertyValueFactory<>("eventDate"));

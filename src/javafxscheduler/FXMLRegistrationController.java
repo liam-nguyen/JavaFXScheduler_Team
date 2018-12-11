@@ -1,3 +1,6 @@
+/**
+ * This class is a controller for the scene Registration. 
+ */
 package javafxscheduler;
 
 import java.io.IOException;
@@ -24,7 +27,6 @@ import javafx.stage.Stage;
 
 
 public class FXMLRegistrationController implements Initializable {
-
     @FXML private Label registrationLabel; 
     @FXML private Label firstNameWarningLabel; 
     @FXML private Label lastNameWarningLabel; 
@@ -41,22 +43,22 @@ public class FXMLRegistrationController implements Initializable {
     @FXML private Button registerButton; 
     @FXML private Button backButton; 
     
+    
     /**
-     * When this method is called, Login Scene appears.
+     * This method goes back to the LogIn Scene. 
+     * @param event 
      */
     public void backButtonPushed (ActionEvent event) { 
         try {
-            /*
-            * Switch to Main Calendar Scene
-            */
+            /* Switch to Login Scene */
             Parent mainCalendarParent = FXMLLoader.load(getClass().getResource("FXMLLogin.fxml"));
             Scene mainCalendarScene = new Scene(mainCalendarParent);
             
-            //This line gets stage informaion
+            /* Display the scene */
             Stage window = (Stage)((Node)event.getSource()).getScene().getWindow();
-            
             window.setScene(mainCalendarScene);
             window.show();
+            
         } catch (IOException ex) {
             Logger.getLogger(FXMLLoginController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -67,12 +69,12 @@ public class FXMLRegistrationController implements Initializable {
      * Notify user if any text field is left empty,
      * Then save data into the database
      * Then switch to Login Scene if successful. 
-     * @param event
+     * @param event: mouse click.
      */
     public void registerButtonPushed (ActionEvent event) { 
-        boolean invalidInput = false; 
+        boolean invalidInput = false; //Check if all the required inputs are filled. 
         
-        //Check if any field is empty
+        /* Check if any field is empty */
         if(firstNameTextField.getText().isEmpty()) {
             firstNameWarningLabel.setText("First name can't be empty.");
             firstNameWarningLabel.setVisible(true);
@@ -99,29 +101,29 @@ public class FXMLRegistrationController implements Initializable {
             invalidInput = true;
         }
         
+        /* If inputs are all valid */
         if (!invalidInput) {
             try { 
+                /* Connect to the database */
                 DatabaseHandler db = new DatabaseHandler();
                 db.connect_CALENDAR();
                 PreparedStatement pstmt;
                 String query; 
-                boolean usedEmail, usedUsername;
                 
-                /**
-                 * Check if email is already in the system.
-                 */
+                boolean usedEmail, usedUsername; //check if email or username is used. 
+                
+                /** Check if email is already in the database. */
                 query = "SELECT * FROM USERS WHERE EMAIL=?";
                 pstmt = db.conn.prepareStatement(query); 
                 pstmt.setString(1, emailTextField.getText());
                 ResultSet rs = pstmt.executeQuery(); 
                 if (rs.next()) {
-                    //Found existing user in the database based on Email.
                     usedEmail = true; 
                 }
                 else 
                     usedEmail = false; 
                 
-                //Alert if email is already in the system. 
+                /* Alert if email is already in the system. */
                 if (usedEmail == true) {
                     Alert errorAlert = new Alert(AlertType.ERROR);
                     errorAlert.setHeaderText("Email found");
@@ -143,7 +145,7 @@ public class FXMLRegistrationController implements Initializable {
                 else 
                     usedUsername = false; 
                 
-                //Alert if email is already in the system. 
+                /* Alert if email is already in the system. */
                 if (usedUsername == true) {
                     Alert errorAlert = new Alert(AlertType.ERROR);
                     errorAlert.setHeaderText("Username found");
@@ -151,15 +153,8 @@ public class FXMLRegistrationController implements Initializable {
                     errorAlert.showAndWait();
                 }
                 
-                /**
-                 * Check if email is already in the system.
-                 */
-                
-                //New User
+                /* New User */
                 if (usedEmail == false && usedUsername == false) {
-                    /**
-                     * If user is not in the database, save user's data into database Calendar
-                     */ 
                     query = "INSERT INTO USERS (first_name, last_name, username, password, email, phone, preference, reminderTime, provider, calendar_color) "
                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstmt = db.conn.prepareStatement(query);
@@ -175,7 +170,7 @@ public class FXMLRegistrationController implements Initializable {
                     pstmt.setString(10, "#ffffff");
                     pstmt.executeUpdate();
                     
-                    //Notify user about successful registration
+                    /* Notify user about successful registration */
                     Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
                     confirmationAlert.setContentText("Successful Registration");
                     confirmationAlert.getButtonTypes().remove(1);
@@ -184,15 +179,12 @@ public class FXMLRegistrationController implements Initializable {
                     /* Close connection */
                     db.close_JDBC();
                     
-                    /*
-                    * Switch to Main Calendar Scene
-                    */ 
+                    /* Switch to Login Scene */ 
                     Parent mainCalendarParent = FXMLLoader.load(getClass().getResource("FXMLLogin.fxml"));
                     Scene mainCalendarScene = new Scene(mainCalendarParent);
-
-                    //This line gets stage informaion
+                    
+                    /* Display */
                     Stage window = (Stage)((Node)event.getSource()).getScene().getWindow();
-
                     window.setScene(mainCalendarScene);
                     window.show();
                 } 
@@ -204,7 +196,6 @@ public class FXMLRegistrationController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
     }    
     
 }

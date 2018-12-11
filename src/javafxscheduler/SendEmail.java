@@ -1,3 +1,7 @@
+/***
+ * This class is a blueprint to send email reminder. 
+ */
+
 package javafxscheduler;
 
 import java.util.*;
@@ -11,17 +15,17 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class SendEmail {
+    /** Fields **/
     private String emailTo; 
     private String emailFromUser = "kaboomcasta1@gmail.com";
     private String emailFromPass = "say2tome";
 
-    /** Constructor */
+    /** Constructor **/
     public SendEmail (String to) {
         emailTo = to; 
     }
     
     /** Setters and Getters **/
-        
    public String getEmailTo() {    
         return emailTo;
    }
@@ -46,9 +50,13 @@ public class SendEmail {
         this.emailFromPass = emailFromPass;
     }
     
-     /** Other Methods */
-
-    public void send (String message) {
+    /********************************** METHODS **********************************/
+    /**
+     * This sends email to the address with a message.
+     * @param message: The message in the email.
+     * @param toEmailAddress: the email address sending to. 
+     */
+    public void send (String message, String toEmailAddress) {
         try { 
             //Contents
             String subject = "Reminder";

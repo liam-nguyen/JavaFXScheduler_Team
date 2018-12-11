@@ -1,3 +1,6 @@
+/**
+ * This class controls the calendar.
+ */
 package javafxscheduler;
 
 import java.io.IOException;
@@ -16,10 +19,10 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -43,6 +46,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
@@ -53,13 +57,9 @@ import javafx.stage.Stage;
 //import jfxtras.scene.control.CalendarPicker;
 
 public class FXMLMainCalendarController implements Initializable {
-
-    /*
-    * All items in Main Calendar Scene
-    */
+        //Calendar componenets
     @FXML private AnchorPane mainPane; 
     @FXML private ColorPicker colorPicker; 
-
     @FXML private Label currentUsernameInfo; 
     @FXML private DatePicker apptDatePicker;
     @FXML private DatePicker oneDateApptDatePicker;
@@ -72,15 +72,15 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private Button selectOneDateButton;
     @FXML private Button removeEventButton; 
     @FXML private Button changeEventButton; 
-    
-            
-        //Items in the Menu
+   
+        //Menu componenets.
     @FXML private MenuBar menuBar; 
     @FXML private Menu accountMenu; 
         @FXML private MenuItem changeEmailMenuItem; 
         @FXML private MenuItem changePasswordMenuItem;
         @FXML private MenuItem changeFirstMenuItem;
         @FXML private MenuItem changeLastMenuItem;
+        @FXML private MenuItem changeReminderTimeMenuItem; 
         @FXML private MenuItem accountDetailMenuItem; 
         @FXML private MenuItem logoutMenuItem;
     @FXML private Menu appointmentMenu;
@@ -89,7 +89,7 @@ public class FXMLMainCalendarController implements Initializable {
     @FXML private Menu settingMenu; 
         @FXML private MenuItem changeToPhoneMenuItem;
         @FXML private MenuItem changeToEmailMenuItem;
-        @FXML private MenuItem setCalendarColorMenuItem;
+        @FXML private MenuItem changeEmailFrequencyMenuItem;
     @FXML private Menu helpMenu; 
    
     /* Items relating to Calendar */
@@ -120,12 +120,12 @@ public class FXMLMainCalendarController implements Initializable {
     private List<TableColumn> dayArray;
     private List<TableView> eventInDayArray = new ArrayList<>();
     
-    
-    /* Other fields */
+    /* Other data fields */
     private User signedInUser; 
     private YearMonth currentYearMonth;
     private YearMonth todayYearMonth;
     private ApptManipulator appointmentManipulator;
+    private int EmailCheckingInterval = 120000;  //in msec
 
     /* Constructor */
     public FXMLMainCalendarController() {
@@ -136,13 +136,15 @@ public class FXMLMainCalendarController implements Initializable {
     /**
      * When this method is called from previous scene, this method will initialize some fields 
      * in the Main Calendar scenes.
+     * @return u: username
+     * @return p: password
      */
     public void initializeMainCalendar (String u, String p) 
     {
-        /*Initialize data */
+        /* Initialize data */
         signedInUser = new User (u, p);
         
-        //Filled in user's data
+        /* Filled in user's data */
         fillInSignedInUserData();
         
         todayYearMonth = YearMonth.from(LocalDate.now());
@@ -150,11 +152,11 @@ public class FXMLMainCalendarController implements Initializable {
         //Initialize Scene elements.
         String[] hourList = new String[] {"12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM",
                 "9AM","10AM","11AM","12PM","1PM","2PM","3PM","4PM","5PM",
-                "6PM","7PM","8PM","9PM","10PM","11PM","12PM"};
+                "6PM","7PM","8PM","9PM","10PM","11PM"};
         String[] intList = new String[60]; 
         DecimalFormat formatter = new DecimalFormat("00"); //set minutes to two digit
         
-        //initialize minutes
+        /* Initialize minutes */
         for (int i = 0; i <= 59; i++) 
         {
             intList[i] = formatter.format(i); 
@@ -163,13 +165,9 @@ public class FXMLMainCalendarController implements Initializable {
         startTimeMinComboBox.getItems().addAll(intList);
         endTimeHourComboBox.getItems().addAll(hourList);
         endTimeMinComboBox.getItems().addAll(intList);
-        
-        
+          
         
         /** Create a thread to send email to user */  
-        // Run in a second
-        final long INTERVAL = 60000; //Every 1 minutes 
-        
         /* Email address to send to */
         String sendTo = signedInUser.getEmail();
         if (signedInUser.getPreference().equals("phone")) {
@@ -178,34 +176,38 @@ public class FXMLMainCalendarController implements Initializable {
         SendEmail sendEmail = new SendEmail(sendTo);
         
         /* Create a running thread to send the email */
-        Runnable runnable = new Runnable() {
+        Runnable runnable;
+        runnable = new Runnable() {
+            @Override
             public void run() {
                 while(true) {
+                    /* Refresh reminder time */
+                    getCurrentReminderTime ();
+                    System.out.println("Current Reminder Time: " + signedInUser.getReminderTime());
                     /* Get array of events for today */
                     LocalDate now = LocalDate.now();
-                    ArrayList <Event> eventsArrayList = getEventArrayList(now); 
+                    ArrayList <Event> eventsArrayList = getEventArrayList(now);
                     for (int i = 0; i < eventsArrayList.size(); i++) {
                         Event ev = eventsArrayList.get(i);
                         /* Start time - ReminderTime */
                         int rewindTime = Integer.parseInt(ev.getStartTime()) - Integer.parseInt(signedInUser.getReminderTime());
                         Calendar rightNow = Calendar.getInstance();
                         int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-                        int min = rightNow.get(Calendar.MINUTE); 
-                        int currentMins = hour * 60 + min; 
+                        int min = rightNow.get(Calendar.MINUTE);
+                        int currentMins = hour * 60 + min;
                         /* Only send reminder if the event hasn't occured yet. */
                         if (currentMins > rewindTime && currentMins < Integer.parseInt(ev.getStartTime())) {
-                             /* Send email to that email address */
-                             String message = "Reminder. You have an appointment. Here is the detail: \n" + ev.getEventName() + " - " + ev.getRealStartTime() + " - " + ev.getRealEndTime();
-                             sendEmail.send(message); 
-                             System.out.println("Reminder Sent....");
+                            /* Send email to that email address */
+                            String message = "Reminder. You have an appointment.\nHere is the detail:\n" + ev.getEventName() + ": " + ev.getEventDate()+ " - " + ev.getRealStartTime() + " to " + ev.getRealEndTime();
+                            sendEmail.send(message, signedInUser.getEmail());
+                            System.out.println("Reminder Sent....");
                         }
+                    }                   
+                    try {
+                        Thread.sleep(EmailCheckingInterval);
+                    }  catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
- 
-                try {
-                    Thread.sleep(INTERVAL);
-                }  catch (InterruptedException e) {	
-                     e.printStackTrace();
-                }
                 }
             }
         };
@@ -241,14 +243,36 @@ public class FXMLMainCalendarController implements Initializable {
             dayArray.get(i).setText(e);
             firstDateOnTheCalendar = firstDateOnTheCalendar.plusDays(1);
         }
-        
         clearEventsInCalendar();
         retrieveExistingEvents(yearMonth);
     }
     
     /************************************** LOGIC **************************************/   
-     /**
+    /**
+     * This method gets Reminder Time from database and apply that to the current User's object. 
+     */
+    public void getCurrentReminderTime () {
+        try {
+            DatabaseHandler db = new DatabaseHandler();
+            db.connect_CALENDAR();
+            String query = "SELECT REMINDERTIME FROM USERS WHERE USERNAME = ?";
+            PreparedStatement pstmt;
+            pstmt = db.conn.prepareStatement(query);
+            pstmt.setString(1, signedInUser.getUsername());
+            ResultSet rs = pstmt.executeQuery();
+            /* Create an ArrayList to store all the events. */ 
+            while (rs.next()) {
+                signedInUser.setReminderTime(rs.getString("ReminderTime"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
       * This method gets all the events of a day and return an ArrayList of Events
+     * @param givenDate: date that we want to retrieve events
+     * @return ArrayList<Event>: an ArrayList of events in a particular date. 
       */
    public ArrayList<Event> getEventArrayList (LocalDate givenDate) {
         ArrayList <Event> eventsArrayList = new ArrayList<>(); 
@@ -286,8 +310,9 @@ public class FXMLMainCalendarController implements Initializable {
         }
         return eventsArrayList;
    }
+   
     /**
-     * This method populate data into the signedInUser
+     * This method populate data into the signedInUser object. 
      */
     public void fillInSignedInUserData() {
         try {
@@ -328,7 +353,9 @@ public class FXMLMainCalendarController implements Initializable {
     }
 
 
-    //Set the calendar to DatePicker's date
+    /**
+     * This method sets the calendar to DatePicker's date.
+     */
     public void setCalToDatePicker() {
         //Use apptDatePicker.getValue().getmonnth and stuff to set the event to the calendar
         int dayofmonthDP = apptDatePicker.getValue().getDayOfMonth();
@@ -360,7 +387,10 @@ public class FXMLMainCalendarController implements Initializable {
         retrieveExistingEvents(currentYearMonth);
     }
     
-    //Clears calendar events
+    
+    /**
+     * This method clears calendar events.
+     */
     public void clearEventsInCalendar() {
         
         for (int j = 0; j < 35; j++) {
@@ -368,7 +398,10 @@ public class FXMLMainCalendarController implements Initializable {
                 }
     }
     
-    //Retrieve events from database and calls to populate existing events
+    /**
+     * Retrieve events from database and calls to populate existing events
+     * @param yearMonth: the month and year that we want to retrieves events from. 
+     */
     public void retrieveExistingEvents(YearMonth yearMonth) {
         DatabaseHandler eventDB = new DatabaseHandler();
         try {
@@ -418,7 +451,9 @@ public class FXMLMainCalendarController implements Initializable {
         }
     }
 
-    /* This method deletes the events in the user's database */
+    /**
+     * This method deletes the events in the user's database.
+     */
     public void deleteData() {
         try {
         DatabaseHandler db = new DatabaseHandler();
@@ -542,6 +577,7 @@ public class FXMLMainCalendarController implements Initializable {
             Logger.getLogger(FXMLMainCalendarController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
     /**
      * This method gets the account detail scene is chosen.
      */
@@ -628,6 +664,7 @@ public class FXMLMainCalendarController implements Initializable {
                     pstmt.setString(1, changeNameresult);
                     pstmt.setString(2, signedInUser.getUsername());
                     pstmt.executeUpdate();
+                    
                     /* Update signedInUser email */
                     signedInUser.setEmail(changeNameresult);
                     
@@ -792,6 +829,56 @@ public class FXMLMainCalendarController implements Initializable {
         }
    }
     
+    
+    /**
+     * This method changes password.
+     * @param event
+     */
+    public void changeReminderTimeMenuItemPushed (ActionEvent event) {
+        try {
+            TextInputDialog changeReminderTimeDialog = new TextInputDialog();
+            changeReminderTimeDialog.setTitle("Reminder Time Change");
+            changeReminderTimeDialog.setContentText("Please enter your new reminder time (minutes): ");
+            //Get response value
+            changeReminderTimeDialog.showAndWait();
+            String newReminderTime = changeReminderTimeDialog.getEditor().getText();            
+            //If there is an input
+            if(!newReminderTime.equals("")) {
+                Alert alert = new Alert(AlertType.CONFIRMATION); 
+                alert.setTitle("Reminder time change confirmation");
+                alert.setContentText("Are you sure?");
+                Optional<ButtonType> confirmationResult = alert.showAndWait();
+                DatabaseHandler db = new DatabaseHandler();
+                if (confirmationResult.get() == ButtonType.OK) {
+                    db.connect_CALENDAR();
+                    String query = "UPDATE USERS SET reminderTime = ? WHERE USERNAME = ?";
+                    PreparedStatement pstmt;
+                    pstmt = db.conn.prepareStatement(query);
+                    pstmt.setString(1, newReminderTime);
+                    pstmt.setString(2, signedInUser.getUsername());
+                    pstmt.executeUpdate();
+                    
+                    /* Update internal user */
+                    signedInUser.setReminderTime(newReminderTime);
+                    
+                    /* Close connection */
+                    db.close_JDBC();
+                }
+                else {changeReminderTimeDialog.close();}
+            }
+            //If there is no input
+            else {
+                //Get alert confirmation to make sure the user wants to the change. 
+                Alert alert = new Alert(AlertType.WARNING); 
+                alert.setContentText("Password can't be empty.");
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("changePasswordMenuItemPushed error: " + ex);
+        }
+   }
+    
+    
     /**
      * This method changes password.
      * @param event
@@ -872,6 +959,48 @@ public class FXMLMainCalendarController implements Initializable {
    }
     
     /**
+     * This method starts when changeEmailFrequencyMenuItem is pushed. 
+     */
+    public void changeEmailFrequencyMenuItemPushed () {
+        TextInputDialog changeInterval = new TextInputDialog();
+        changeInterval.setTitle("Email Frequency Change. Default value is: 2 minutes.");
+        changeInterval.setContentText("Please enter your new interval in minutes. Max value is: 1440.");
+        //Get response value
+        changeInterval.showAndWait();
+        String newInterval = changeInterval.getEditor().getText();
+        try {
+            int newIntervalInt = Integer.parseInt(newInterval);
+            
+            //If input is a number
+            if(newIntervalInt <= 0) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setContentText("The input can't be negative or equal to 0. ");
+            alert.showAndWait();
+            }
+            
+            else if (newIntervalInt > 1440) {
+                Alert alert = new Alert(AlertType.ERROR);
+            alert.setContentText("The input can't be more than 1440.");
+            alert.showAndWait();
+            }
+            
+            else {
+                EmailCheckingInterval = newIntervalInt * 60000; 
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setContentText("SUCCESS");
+                alert.showAndWait();
+                System.out.println("Current frequency: " + EmailCheckingInterval);
+            }
+        } 
+        catch (NumberFormatException nfe) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setContentText("The input is not a number");
+            alert.showAndWait(); 
+        }
+        
+        
+    }
+    /**
      * This method moves the month back by one and 
      * re-populate the calendar with correct date.
      */
@@ -906,16 +1035,24 @@ public class FXMLMainCalendarController implements Initializable {
             int month = currentYearMonth.getMonthValue();
             int tableSelectedIndex = Integer.valueOf(event.getPickResult().getIntersectedNode().getParent().getId()); 
             int day = Integer.valueOf(dayArray.get(tableSelectedIndex).getText());
-
+             
             if (tableSelectedIndex <= 6 && Integer.valueOf(dayArray.get(tableSelectedIndex).getText()) > 23) {
                 //currentYearMonth = currentYearMonth.minusMonths(1);
             }
+            else if (tableSelectedIndex >= 29 && Integer.valueOf(dayArray.get(tableSelectedIndex).getText()) < 7) {
+            
+            }
             else {
             apptDatePicker.setValue(LocalDate.of(year, month, day));
+            oneDateApptDatePicker.setValue(LocalDate.of(year, month, day));
+            selectOneDateButtonClicked ();
             }
         }  
     }    
     
+    /**
+     * This method is called when the DatePicker to pushed. This will populate the TableViews with all events in a single day. 
+     */
     public void selectOneDateButtonClicked () {
         LocalDate input = oneDateApptDatePicker.getValue();
         if (input != null) {
@@ -1009,7 +1146,9 @@ public class FXMLMainCalendarController implements Initializable {
         }
     }
     
-    
+    /**
+     * This method exports all the events into an Excel file. 
+     */
     public void exportAllMenuItemPushed () {
         LocalDate input = oneDateApptDatePicker.getValue(); 
         /* Create an object ApptManipulator in this MainCalendar */
@@ -1018,6 +1157,11 @@ public class FXMLMainCalendarController implements Initializable {
         appointmentManipulator.writeToFile();
     }
     
+    
+    /**
+     * This method opens a new window to import events from a file. 
+     * @param event 
+     */
     public void importAppointmentMenuItemPushed (ActionEvent event) {
         try {
             /*
@@ -1104,9 +1248,7 @@ public class FXMLMainCalendarController implements Initializable {
     /************************************** INITIALIZATION **************************************/
     //create method for retreiving event data and refreshing it everything calendar changes.
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        
-        
+    public void initialize(URL url, ResourceBundle rb) {        
                 //Populate the calendar with day numbers
         //Put the tablecolumns into the day array
         dayArray.add(d1); dayArray.add(d2); dayArray.add(d3); dayArray.add(d4); dayArray.add(d5); dayArray.add(d6); dayArray.add(d7);
@@ -1128,10 +1270,10 @@ public class FXMLMainCalendarController implements Initializable {
         for (int j = 0; j < 35; j++) {
             eventInDayArray.get(j).setPlaceholder(new Label());
                 }
-        //set eventName to every tableviews
+        //set eventName to every tablecolumn
         for (int i = 0; i < 35; i++) {
             dayArray.get(i).setCellValueFactory(new PropertyValueFactory<>("eventName"));
         }
+       
     }    
-    
 }
